@@ -1,6 +1,8 @@
 from typing import Any
 
 import torch
+from torch import Tensor
+from torch import sparse
 import torch.nn as nn
 
 
@@ -20,8 +22,10 @@ class SparseModuleFunction(torch.autograd.Function):
         pass
 
     @staticmethod
-    def forward(ctx: Any, *args: Any, **kwargs: Any) -> Any:
-        pass
+    def forward(ctx, x: Tensor, weights: Tensor, bias: Tensor) -> Any:
+        out = sparse.mm(weights, x) + bias
+        ctx.save_for_backward(out, weights)
+        return out
 
     @staticmethod
     def backward(ctx: Any, *grad_outputs: Any) -> Any:
