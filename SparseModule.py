@@ -22,8 +22,8 @@ class SparseLayer(nn.Module):
             bias = torch.rand(size_out)
             self.bias = nn.Parameter(bias)
 
-    def forward(self, input):
-        out = sparse.mm(self.weights.t(), input)
+    def forward(self, in_values):
+        out = sparse.mm(self.weights.t(), in_values)
         if self.bias:
             torch.add(out, self.bias)
         return out
