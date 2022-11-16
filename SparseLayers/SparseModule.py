@@ -1,10 +1,8 @@
 from typing import Any
 
 import torch
-import numpy as np
 from torch import Tensor
 from torch import sparse
-from torch import sparse_coo_tensor
 import torch.nn as nn
 
 
@@ -14,7 +12,8 @@ class SparseLayer(nn.Module):
         super(SparseLayer, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
-        #Inicjalizacja wag
+        self.csr_mode = csr_mode
+        # Inicjalizacja wag
         weights = torch.FloatTensor(in_features, out_features).uniform_(-1, 1)
         weights[torch.where(abs(weights) <= 0.5)] = 0
         if csr_mode:
@@ -22,7 +21,7 @@ class SparseLayer(nn.Module):
         else:
             weights = weights.to_sparse_coo()
         self.weights = nn.Parameter(weights)
-        #Inicjalizacja biasu
+        # Inicjalizacja biasu
         self.bias = None
         if bias:
             bias = torch.rand(out_features)
@@ -41,7 +40,16 @@ class SparseLayer(nn.Module):
             torch.add(out, self.bias)
         return out
 
-
+    def assign_new_weights(self, new_weights):
+        if not torch.is_tensor(new_weights):
+            raise TypeError("New weights must be a Tensor")
+        if new_weights.size() != torch.Size([self.in_features, self.out_features]):
+            raise Exception("New weights shape does not match the old shape")
+        if self.csr_mode:
+            self.weights = nn.Parameter(new_weights.to_sparse_csr())
+            return
+        self.weights = nn.Parameter(new_weights.to_sparse_coo())
+        return
 
 
 # implementacja funkcjonalności warstwy, a więc przejścia "w przód" oraz "w tył"
