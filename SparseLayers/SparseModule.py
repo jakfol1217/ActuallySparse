@@ -40,6 +40,8 @@ class SparseLayer(nn.Module):
             torch.add(out, self.bias)
         return out
 
+    # Funkcja służąca do nadawania nowych wag, głównie przy inicjalizacji
+    # Ma automtycznie przekształcać na reprezentację rzadką
     def assign_new_weights(self, new_weights):
         if not torch.is_tensor(new_weights):
             raise TypeError("New weights must be a Tensor")
@@ -53,6 +55,7 @@ class SparseLayer(nn.Module):
 
 
 # implementacja funkcjonalności warstwy, a więc przejścia "w przód" oraz "w tył"
+# TODO
 class SparseModuleFunction(torch.autograd.Function):
     @staticmethod
     def jvp(ctx: Any, *grad_inputs: Any) -> Any:
