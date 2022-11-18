@@ -31,14 +31,14 @@ class SparseLayer(nn.Module):
         if not torch.is_tensor(in_values):
             raise TypeError("Input must be a Tensor")
         if len(in_values.size()) == 1:
-            in_values = in_values.view(in_values.size()[0], 1)
+            in_values = in_values.view(-1, 1)
         if self.in_features not in in_values.size():
             raise Exception("Input values shape does not match")
         if in_values.size()[0] != self.in_features:
             in_values = in_values.t()
         out = sparse.mm(self.weights.t(), in_values)
         if self.bias is not None:
-            torch.add(out, self.bias)
+            out = torch.add(out.t(), self.bias)
         return out
 
     # Funkcja służąca do nadawania nowych wag, głównie przy inicjalizacji
@@ -47,12 +47,15 @@ class SparseLayer(nn.Module):
         if not torch.is_tensor(new_weights):
             raise TypeError("New weights must be a Tensor")
         if new_weights.size() != torch.Size([self.in_features, self.out_features]):
-            raise Exception("Weight shape mismatch")
+            if new_weights.t().size() == torch.Size([self.in_features, self.out_features]):
+                new_weights = new_weights.t()
+            else:
+                raise Exception("Weight shape mismatch")
         if bias is not None and bias.size() != torch.Size([self.out_features]):
             raise Exception("Bias shape mismatch")
 
         if bias is not None:
-            self.bias = bias
+            self.bias = nn.Parameter(bias)
 
         if self.csr_mode:
             self.weights = nn.Parameter(new_weights.to_sparse_csr())
@@ -80,9 +83,9 @@ class SparseModuleFunction(torch.autograd.Function):
         pass
 
 
-def new_random_basic_coo(in_features, out_features):
-    return SparseLayer(in_features, out_features)
+def new_random_basic_coo(in_features, out_features, bias=True):
+    return SparseLayer(in_features, out_features, bias=bias)
 
 
-def new_random_basic_csr(in_features, out_features):
-    return SparseLayer(in_features, out_features, csr_mode=True)
+def new_random_basic_csr(in_features, out_features, bias=True):
+    return SparseLayer(in_features, out_features, bias=bias, csr_mode=True)

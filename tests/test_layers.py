@@ -23,7 +23,7 @@ def test_initialization(constructor):
 def test_forward_size(size):
     layer = SparseLayer(size[0], size[1])
     data = torch.rand(size[0])
-    assert layer.forward(data).size()[0] == size[1]
+    assert layer.forward(data).size()[1] == size[1]
 
 
 def test_compare_linear():
