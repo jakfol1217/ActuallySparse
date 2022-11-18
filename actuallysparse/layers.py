@@ -36,7 +36,6 @@ class SparseLayer(nn.Module):
             raise Exception("Input values shape does not match")
         if in_values.size()[0] != self.in_features:
             in_values = in_values.t()
-        print(in_values.size())
         out = sparse.mm(self.weights.t(), in_values)
         if self.bias is not None:
             torch.add(out, self.bias)
