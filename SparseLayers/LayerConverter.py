@@ -37,6 +37,7 @@ def match_packager(convert_target: str):
 
 
 def extract_params_dense(layer: Linear):
+    # Klonowanie wartości, a nie tylko referencji, żeby operacje wykonane na jednej z warstw nie miały wpływu na drugą
     return layer.weight.data.clone().detach(), layer.bias.data.clone().detach()
 
 
@@ -62,4 +63,4 @@ def package_params_coo(weight, bias):
 
 
 def package_params_csr(weight, bias):
-    raise  NotImplementedError()  # todo
+    raise NotImplementedError()  # todo
