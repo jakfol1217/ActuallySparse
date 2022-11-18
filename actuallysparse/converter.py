@@ -58,9 +58,18 @@ def package_params_dense(weight, bias):
     return converted_layer
 
 
+def package_params_sparse(weight, bias, constructor):
+    out_features, in_features = weight.size()
+    converted_layer = constructor(in_features, out_features)
+    converted_layer.assign_new_weights(weight.t())
+    converted_layer.bias.data = bias
+
+    return converted_layer
+
+
 def package_params_coo(weight, bias):
-    raise NotImplementedError()  # todo
+    return package_params_sparse(weight, bias, SparseLayer)
 
 
 def package_params_csr(weight, bias):
-    raise NotImplementedError()  # todo
+    return package_params_sparse(weight, bias, lambda in_features, out_features: SparseLayer(in_features, out_features, csr_mode=True))
