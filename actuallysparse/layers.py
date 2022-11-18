@@ -30,6 +30,8 @@ class SparseLayer(nn.Module):
     def forward(self, in_values: Tensor):
         if not torch.is_tensor(in_values):
             raise TypeError("Input must be a Tensor")
+        if len(in_values.size()) == 1:
+            in_values = in_values.view(in_values.size()[0], 1)
         if self.in_features not in in_values.size():
             raise Exception("Input values shape does not match")
         if in_values.size()[0] != self.in_features:
