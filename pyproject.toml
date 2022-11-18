@@ -3,11 +3,11 @@ name = "actuallysparse"
 version = "0.0.1"
 authors = [
     { name="Kacper Grzymkowski", email="kacper.grzymkowski00@gmail.com" },
-    { name="Jakub Fołtyn" },
+    { name="Jakub Fołtyn", email="jakub.foltyn1217@gmail.com"},
 ]
 description = "Actually sparse neural network layers"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 
 [tool.pytest.ini_options]
 pythonpath = [
