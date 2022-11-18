@@ -19,7 +19,7 @@ def test_convert_range(layer_constructor, conversion_target):
     original = layer_constructor(3, 4)
     converted = converter.convert(original, conversion_target)
 
-    assert (original.forward(data) == converted.forward(data)).all
+    assert (original.forward(data) == converted.forward(data)).all()
 
 
 def test_unknown_target():
