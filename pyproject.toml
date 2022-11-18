@@ -7,7 +7,7 @@ authors = [
 ]
 description = "Actually sparse neural network layers"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 
 [tool.pytest.ini_options]
 pythonpath = [
