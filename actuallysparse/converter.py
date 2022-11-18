@@ -1,4 +1,4 @@
-from SparseLayers.SparseModule import SparseLayer
+from actuallysparse.layers import SparseLayer
 from torch.nn.modules import Linear
 from torch import Tensor
 
