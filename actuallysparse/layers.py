@@ -36,9 +36,9 @@ class SparseLayer(nn.Module):
             raise Exception("Input values shape does not match")
         if in_values.size()[0] != self.in_features:
             in_values = in_values.t()
-        out = sparse.mm(self.weights.t(), in_values)
+        out = sparse.mm(self.weights.t(), in_values).t()
         if self.bias is not None:
-            out = torch.add(out.t(), self.bias)
+            out = torch.add(out, self.bias)
         return out
 
     # Funkcja służąca do nadawania nowych wag, głównie przy inicjalizacji
