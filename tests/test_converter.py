@@ -2,14 +2,14 @@ import pytest
 from torch.nn.modules import Linear
 import torch
 from actuallysparse import converter
-from actuallysparse.layers import SparseLayer
+from actuallysparse.layers import new_random_basic_coo, new_random_basic_csr
 
 
 @pytest.mark.parametrize(
     "layer_constructor, conversion_target",
     [
         (constructor, target)
-        for constructor in [Linear, SparseLayer, lambda x, y: SparseLayer(x, y, csr_mode=True)]
+        for constructor in [Linear, new_random_basic_coo, new_random_basic_csr]
         for target in ["dense", "coo", "csr"]
     ]
 )

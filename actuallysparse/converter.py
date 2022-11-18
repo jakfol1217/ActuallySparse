@@ -1,3 +1,4 @@
+from actuallysparse import layers
 from actuallysparse.layers import SparseLayer
 from torch.nn.modules import Linear
 from torch import Tensor
@@ -68,8 +69,8 @@ def package_params_sparse(weight, bias, constructor):
 
 
 def package_params_coo(weight, bias):
-    return package_params_sparse(weight, bias, SparseLayer)
+    return package_params_sparse(weight, bias, layers.new_random_basic_coo)
 
 
 def package_params_csr(weight, bias):
-    return package_params_sparse(weight, bias, lambda in_features, out_features: SparseLayer(in_features, out_features, csr_mode=True))
+    return package_params_sparse(weight, bias, layers.new_random_basic_csr)

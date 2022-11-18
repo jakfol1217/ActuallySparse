@@ -73,3 +73,11 @@ class SparseModuleFunction(torch.autograd.Function):
     @staticmethod
     def backward(ctx: Any, *grad_outputs: Any) -> Any:
         pass
+
+
+def new_random_basic_coo(in_features, out_features):
+    return SparseLayer(in_features, out_features)
+
+
+def new_random_basic_csr(in_features, out_features):
+    return SparseLayer(in_features, out_features, csr_mode=True)
