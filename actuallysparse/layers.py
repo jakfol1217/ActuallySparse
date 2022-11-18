@@ -43,16 +43,21 @@ class SparseLayer(nn.Module):
 
     # Funkcja służąca do nadawania nowych wag, głównie przy inicjalizacji
     # ma automatycznie przekształcać na reprezentację rzadką
-    def assign_new_weights(self, new_weights):
+    def assign_new_weights(self, new_weights, bias=None):
         if not torch.is_tensor(new_weights):
             raise TypeError("New weights must be a Tensor")
         if new_weights.size() != torch.Size([self.in_features, self.out_features]):
-            raise Exception("New weights shape does not match the old shape")
+            raise Exception("Weight shape mismatch")
+        if bias is not None and bias.size() != torch.Size([self.out_features]):
+            raise Exception("Bias shape mismatch")
+
+        if bias is not None:
+            self.bias = bias
+
         if self.csr_mode:
             self.weights = nn.Parameter(new_weights.to_sparse_csr())
             return
         self.weights = nn.Parameter(new_weights.to_sparse_coo())
-        return
 
 
 # implementacja funkcjonalności warstwy, a więc przejścia "w przód" oraz "w tył"
