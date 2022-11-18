@@ -6,7 +6,7 @@ from torch import sparse
 import torch.nn as nn
 
 
-# Klasa implementująca samą warstwę, tzn. m.in. przechowywanie paramterów
+# Klasa implementująca samą warstwę, tzn. m.in. przechowywanie parametrów
 class SparseLayer(nn.Module):
     def __init__(self, in_features, out_features, bias=True, csr_mode=False):
         super(SparseLayer, self).__init__()
@@ -42,7 +42,7 @@ class SparseLayer(nn.Module):
         return out
 
     # Funkcja służąca do nadawania nowych wag, głównie przy inicjalizacji
-    # Ma automtycznie przekształcać na reprezentację rzadką
+    # ma automatycznie przekształcać na reprezentację rzadką
     def assign_new_weights(self, new_weights):
         if not torch.is_tensor(new_weights):
             raise TypeError("New weights must be a Tensor")
