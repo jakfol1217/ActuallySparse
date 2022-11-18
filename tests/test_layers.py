@@ -35,5 +35,6 @@ def test_compare_linear():
         linear.bias.data
     )
 
-    data = torch.tensor([1., 2., 3.])
-    assert (linear.forward(data) == sparse.forward(data)).all()
+    data = torch.tensor([[1., 2., 3.]])
+    assert (linear.forward(data).size() == sparse.forward(data).size())
+    assert torch.allclose(linear.forward(data), sparse.forward(data))
