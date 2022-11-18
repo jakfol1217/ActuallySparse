@@ -1,0 +1,15 @@
+[project]
+name = "actuallysparse"
+version = "0.0.1"
+authors = [
+    { name="Kacper Grzymkowski", email="kacper.grzymkowski00@gmail.com" },
+    { name="Jakub Fołtyn" },
+]
+description = "Actually sparse neural network layers"
+readme = "README.md"
+requires-python = ">=3.7"
+
+[tool.pytest.ini_options]
+pythonpath = [
+    "."
+]
