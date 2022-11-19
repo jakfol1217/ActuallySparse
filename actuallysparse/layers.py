@@ -14,13 +14,13 @@ class SparseLayer(nn.Module):
         self.out_features = out_features
         self.csr_mode = csr_mode
         # Inicjalizacja wag
-        weights = torch.FloatTensor(in_features, out_features).uniform_(-1, 1)
-        weights[torch.where(abs(weights) <= 0.5)] = 0
+        weight = torch.FloatTensor(in_features, out_features).uniform_(-1, 1)
+        weight[torch.where(abs(weight) <= 0.5)] = 0
         if csr_mode:
-            weights = weights.to_sparse_csr()
+            weight = weight.to_sparse_csr()
         else:
-            weights = weights.to_sparse_coo()
-        self.weights = nn.Parameter(weights)
+            weight = weight.to_sparse_coo()
+        self.weight = nn.Parameter(weight)
         # Inicjalizacja biasu
         self.bias = None
         if bias:
@@ -36,19 +36,20 @@ class SparseLayer(nn.Module):
             raise Exception("Input values shape does not match")
         if in_values.size()[0] != self.in_features:
             in_values = in_values.t()
-        out = sparse.mm(self.weights.t(), in_values).t()
-        if self.bias is not None:
-            out = torch.add(out, self.bias)
-        return out
+        return SparseModuleFunction.apply(in_values, self.weight, self.bias)
+        #out = sparse.mm(self.weight.t(), in_values).t()
+        #if self.bias is not None:
+        #    out = torch.add(out, self.bias)
+        #return out
 
     # Funkcja służąca do nadawania nowych wag, głównie przy inicjalizacji
     # ma automatycznie przekształcać na reprezentację rzadką
-    def assign_new_weights(self, new_weights, bias=None):
-        if not torch.is_tensor(new_weights):
-            raise TypeError("New weights must be a Tensor")
-        if new_weights.size() != torch.Size([self.in_features, self.out_features]):
-            if new_weights.t().size() == torch.Size([self.in_features, self.out_features]):
-                new_weights = new_weights.t()
+    def assign_new_weight(self, new_weight, bias=None):
+        if not torch.is_tensor(new_weight):
+            raise TypeError("New weight must be a Tensor")
+        if new_weight.size() != torch.Size([self.in_features, self.out_features]):
+            if new_weight.t().size() == torch.Size([self.in_features, self.out_features]):
+                new_weight = new_weight.t()
             else:
                 raise Exception("Weight shape mismatch")
         if bias is not None and bias.size() != torch.Size([self.out_features]):
@@ -58,30 +59,31 @@ class SparseLayer(nn.Module):
             self.bias = nn.Parameter(bias)
 
         if self.csr_mode:
-            self.weights = nn.Parameter(new_weights.to_sparse_csr())
+            self.weight = nn.Parameter(new_weight.to_sparse_csr())
             return
-        self.weights = nn.Parameter(new_weights.to_sparse_coo())
+        self.weight = nn.Parameter(new_weight.to_sparse_coo())
 
 
 # implementacja funkcjonalności warstwy, a więc przejścia "w przód" oraz "w tył"
 # TODO
 class SparseModuleFunction(torch.autograd.Function):
-    @staticmethod
-    def jvp(ctx: Any, *grad_inputs: Any) -> Any:
-        pass
+
 
     @staticmethod
-    def forward(ctx: Any, *args: Any, **kwargs: Any) -> Any:
-        pass
-        # out = sparse.mm(weights, x) + bias
-        # ctx.save_for_backward(out, weights)
-
-    # return out
+    def forward(ctx: Any, in_values: Tensor, weight: Tensor, bias = None) -> Tensor:
+        ctx.save_for_backward(in_values, weight, bias)
+        out = sparse.mm(weight.t(), in_values).t()
+        if bias is not None:
+            out = torch.add(out, bias)
+        return out
 
     @staticmethod
     def backward(ctx: Any, *grad_outputs: Any) -> Any:
         pass
 
+    @staticmethod
+    def jvp(ctx: Any, *grad_inputs: Any) -> Any:
+        pass
 
 def new_random_basic_coo(in_features, out_features, bias=True):
     return SparseLayer(in_features, out_features, bias=bias)

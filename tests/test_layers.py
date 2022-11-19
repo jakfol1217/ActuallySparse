@@ -11,7 +11,7 @@ from actuallysparse.layers import SparseLayer
 )
 def test_initialization(constructor):
     assert torch.is_same_size(
-        constructor(3, 3).weights.data,
+        constructor(3, 3).weight.data,
         torch.zeros(3, 3)
     )
 
@@ -30,7 +30,7 @@ def test_compare_linear():
     linear = Linear(3, 4)
     sparse = layers.new_random_basic_coo(3, 4)
 
-    sparse.assign_new_weights(
+    sparse.assign_new_weight(
         linear.weight.data,
         linear.bias.data
     )
