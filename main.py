@@ -1,3 +1,1 @@
-import torch
-a = [2,3]
-print(a)
+# Póki co nieużywana, prawdopodobnie do usunięcia w przyszłości
