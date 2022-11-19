@@ -22,10 +22,11 @@ class SparseLayer(nn.Module):
             weight = weight.to_sparse_coo()
         self.weight = nn.Parameter(weight)
         # Inicjalizacja biasu
-        self.bias = None
         if bias:
             bias = torch.rand(out_features)
             self.bias = nn.Parameter(bias)
+        else:
+            self.register_parameter('bias', None)
 
     def forward(self, in_values: Tensor):
         if not torch.is_tensor(in_values):
@@ -70,7 +71,7 @@ class SparseModuleFunction(torch.autograd.Function):
 
 
     @staticmethod
-    def forward(ctx: Any, in_values: Tensor, weight: Tensor, bias = None) -> Tensor:
+    def forward(ctx, in_values, weight, bias=None):
         ctx.save_for_backward(in_values, weight, bias)
         out = sparse.mm(weight.t(), in_values).t()
         if bias is not None:
@@ -78,8 +79,16 @@ class SparseModuleFunction(torch.autograd.Function):
         return out
 
     @staticmethod
-    def backward(ctx: Any, *grad_outputs: Any) -> Any:
-        pass
+    def backward(ctx, grad_output):
+        in_values, weight, bias = ctx.saved_tensors
+        grad_in_values = grad_weight = grad_bias = None
+        if ctx.needs_input_grad[0]:
+            grad_in_values = sparse.mm(weight.t(), grad_output.t()).t() # tensor rzadki musi być pierwszy
+        if ctx.needs_input_grad[1]:
+            grad_weight = torch.mm(grad_output.t(), in_values)
+        if bias is not None and ctx.needs_input_grad[2]:
+            grad_bias = grad_output.sum(0)
+        return grad_in_values, grad_weight, grad_bias
 
     @staticmethod
     def jvp(ctx: Any, *grad_inputs: Any) -> Any:
