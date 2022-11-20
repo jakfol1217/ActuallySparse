@@ -70,6 +70,8 @@ class SparseLayer(nn.Module):
         if remove_zeros:
             self.remove_zeros_from_weight()
 
+    # Usuwa zera z listy wartości wagi, nie działa dla reprezentacji CSR
+    # Tworzy nowy tensor rzadki i zapisuje na miejsce starego
     def remove_zeros_from_weight(self):
         if self.csr_mode:
             raise Exception("Cannot remove zeroes with csr mode on")
