@@ -25,3 +25,14 @@ def test_convert_range(layer_constructor, conversion_target):
 def test_unknown_target():
     with pytest.raises(TypeError):
         converter.convert(Linear(1, 1), "not_a_type")
+
+
+@pytest.mark.parametrize("conversion_target", ["dense", "coo", "csr"])
+def test_convert_with_mask(conversion_target):
+    mask = torch.tensor([[1., 0., 0.], [0., 0., 0.], [1., 1., 1.], [0., 0., 1.]])
+    original = Linear(3, 4)
+
+    new = converter.convert(original, conversion_target, mask)
+
+    assert pytest.approx(0.) == new.weight.data[1, 1]
+    assert original.weight.data[1, 1] != 0.
