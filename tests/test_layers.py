@@ -69,3 +69,22 @@ def test_compare_linear_backward():
     res_sparse.backward()
 
     assert torch.allclose(linear.weight.grad, sparse.weight.grad.to_dense().t())
+
+@pytest.mark.parametrize(
+    "k, tensor_after_pruning",
+        [(0.1, torch.Tensor([[0., 0.2, 0.3, 0.4, 0.5],
+                             [0.6, 0.7, 0.8, 0.9, 1.]])),
+        (0.33, torch.Tensor([[0., 0., 0., 0.4, 0.5],
+                            [0.6, 0.7, 0.8, 0.9, 1.]])),
+        (0.5, torch.Tensor([[0., 0., 0., 0., 0.],
+                           [0.6, 0.7, 0.8, 0.9, 1.]]))
+         ]
+)
+def test_pruning(k, tensor_after_pruning):
+    sparse = layers.new_random_basic_coo(2, 5)
+    sparse.assign_new_weight(
+        torch.Tensor([[0.1, 0.2, 0.3, 0.4, 0.5],
+                      [0.6, 0.7, 0.8, 0.9, 1.]])
+    )
+    sparse.prune_smallest_values(k)
+    assert torch.allclose(sparse.weight.to_dense(), tensor_after_pruning)

@@ -60,11 +60,17 @@ class SparseLayer(nn.Module):
             return
         self.weight = nn.Parameter(new_weight.to_sparse_coo())
 
+    # Ustawia k procent najmniejszych wartości na 0
+    def prune_smallest_values(self, k=0.1):
+        if k < 0 or k > 1:
+            raise Exception("K must be a value between 0 and 1")
+        with torch.no_grad():
+            values = self.weight.values()
+            values[values < torch.quantile(values, q=k)] = 0
+
 
 # implementacja funkcjonalności warstwy, a więc przejścia "w przód" oraz "w tył"
-# TODO
 class SparseModuleFunction(torch.autograd.Function):
-
 
     @staticmethod
     def forward(ctx, in_values, weight, bias=None):
