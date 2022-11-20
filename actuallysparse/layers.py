@@ -80,7 +80,9 @@ class SparseModuleFunction(torch.autograd.Function):
         grad_in_values = grad_weight = grad_bias = None
         if ctx.needs_input_grad[0]:
             grad_in_values = sparse.mm(weight, grad_output.t())
-        if ctx.needs_input_grad[1]:
+        if ctx.needs_input_grad[1] and weight.is_sparse_csr:
+            grad_weight = torch.mm(in_values, grad_output).to_sparse_csr()
+        elif ctx.needs_input_grad[1] and not weight.is_sparse_csr:
             grad_weight = torch.mm(in_values, grad_output).to_sparse_coo()
         if bias is not None and ctx.needs_input_grad[2]:
             grad_bias = grad_output.sum(0)
