@@ -8,11 +8,11 @@ def convert(layer: Linear | SparseLayer, convert_target: str, mask: None | Tenso
     extractor = match_extractor(layer)
     packager = match_packager(convert_target)
 
-    weights, bias = extractor(layer)
+    weight, bias = extractor(layer)
     if mask is not None:
-        weights = weights * mask
+        weight = weight * mask
 
-    return packager(weights, bias)
+    return packager(weight, bias)
 
 
 def match_extractor(layer):
@@ -43,7 +43,7 @@ def extract_params_dense(layer: Linear):
 
 
 def extract_params_sparse_coo(layer: SparseLayer):
-    return layer.weights.data.to_dense().t(), layer.bias.data.clone().detach()
+    return layer.weight.data.to_dense().t(), layer.bias.data.clone().detach()
 
 
 extract_params_sparse_csr = extract_params_sparse_coo
@@ -62,8 +62,7 @@ def package_params_dense(weight, bias):
 def package_params_sparse(weight, bias, constructor):
     out_features, in_features = weight.size()
     converted_layer = constructor(in_features, out_features)
-    converted_layer.assign_new_weights(weight.t())
-    converted_layer.bias.data = bias
+    converted_layer.assign_new_weight(weight.t(), bias=bias)
 
     return converted_layer
 
