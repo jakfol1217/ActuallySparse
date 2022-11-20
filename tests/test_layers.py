@@ -38,3 +38,34 @@ def test_compare_linear():
     data = torch.tensor([[1., 2., 3.]])
     assert (linear.forward(data).size() == sparse.forward(data).size())
     assert torch.allclose(linear.forward(data), sparse.forward(data))
+
+
+def test_backward():
+    sparse = layers.new_random_basic_coo(3, 1)
+
+    data = torch.tensor([[1., 2., 3.]])
+
+    res_sparse = sparse.forward(data)
+    res_sparse.backward()
+
+    assert torch.allclose(sparse.weight.grad, data)
+
+
+def test_compare_linear_backward():
+    linear = Linear(3, 1)
+    sparse = layers.new_random_basic_coo(3, 1)
+
+    sparse.assign_new_weight(
+        linear.weight.data,
+        linear.bias.data
+    )
+
+    data = torch.tensor([[1., 2., 3.]])
+
+    res_linear = linear.forward(data)
+    res_sparse = sparse.forward(data)
+
+    res_linear.backward()
+    res_sparse.backward()
+
+    assert torch.allclose(linear.weight.grad, sparse.weight.grad)
