@@ -38,10 +38,6 @@ class SparseLayer(nn.Module):
         if in_values.size()[0] != self.in_features:
             in_values = in_values.t()
         return SparseModuleFunction.apply(in_values, self.weight, self.bias)
-        #out = sparse.mm(self.weight.t(), in_values).t()
-        #if self.bias is not None:
-        #    out = torch.add(out, self.bias)
-        #return out
 
     # Funkcja służąca do nadawania nowych wag, głównie przy inicjalizacji
     # ma automatycznie przekształcać na reprezentację rzadką
@@ -83,16 +79,13 @@ class SparseModuleFunction(torch.autograd.Function):
         in_values, weight, bias = ctx.saved_tensors
         grad_in_values = grad_weight = grad_bias = None
         if ctx.needs_input_grad[0]:
-            grad_in_values = sparse.mm(weight.t(), grad_output.t()).t() # tensor rzadki musi być pierwszy
+            grad_in_values = sparse.mm(weight, grad_output.t())
         if ctx.needs_input_grad[1]:
-            grad_weight = torch.mm(grad_output.t(), in_values)
+            grad_weight = torch.mm(in_values, grad_output).to_sparse_coo()
         if bias is not None and ctx.needs_input_grad[2]:
             grad_bias = grad_output.sum(0)
         return grad_in_values, grad_weight, grad_bias
 
-    @staticmethod
-    def jvp(ctx: Any, *grad_inputs: Any) -> Any:
-        pass
 
 def new_random_basic_coo(in_features, out_features, bias=True):
     return SparseLayer(in_features, out_features, bias=bias)

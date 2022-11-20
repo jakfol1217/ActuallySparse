@@ -48,7 +48,7 @@ def test_backward():
     res_sparse = sparse.forward(data)
     res_sparse.backward()
 
-    assert torch.allclose(sparse.weight.grad, data)
+    assert torch.allclose(sparse.weight.grad.to_dense().t(), data)
 
 
 def test_compare_linear_backward():
@@ -68,4 +68,4 @@ def test_compare_linear_backward():
     res_linear.backward()
     res_sparse.backward()
 
-    assert torch.allclose(linear.weight.grad, sparse.weight.grad)
+    assert torch.allclose(linear.weight.grad, sparse.weight.grad.to_dense().t())
