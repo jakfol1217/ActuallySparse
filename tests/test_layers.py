@@ -88,3 +88,12 @@ def test_pruning(k, tensor_after_pruning):
     )
     sparse.prune_smallest_values(k)
     assert torch.allclose(sparse.weight.to_dense(), tensor_after_pruning)
+
+def test_pruning_reduce_size():
+    sparse = layers.new_random_basic_coo(2, 5)
+    sparse.assign_new_weight(
+        torch.Tensor([[0.1, 0.2, 0.3, 0.4, 0.5],
+                      [0.6, 0.7, 0.8, 0.9, 1.]])
+    )
+    sparse.prune_smallest_values(0.5)
+    assert len(sparse.weight.coalesce().values()) == 5
