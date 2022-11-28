@@ -8,11 +8,12 @@ import torch.nn as nn
 
 # Klasa implementująca samą warstwę, tzn. m.in. przechowywanie parametrów
 class SparseLayer(nn.Module):
-    def __init__(self, in_features, out_features, bias=True, csr_mode=False):
+    def __init__(self, in_features, out_features, bias=True, csr_mode=False, training=True):
         super(SparseLayer, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
         self.csr_mode = csr_mode
+        self.training=training
         # Inicjalizacja wag
         weight = torch.FloatTensor(in_features, out_features).uniform_(-1, 1)
         weight[torch.where(abs(weight) <= 0.5)] = 0
@@ -28,7 +29,7 @@ class SparseLayer(nn.Module):
         else:
             self.register_parameter('bias', None)
 
-    def forward(self, in_values: Tensor):
+    def forward(self, in_values):
         if not torch.is_tensor(in_values):
             raise TypeError("Input must be a Tensor")
         if len(in_values.size()) == 1:
@@ -37,7 +38,7 @@ class SparseLayer(nn.Module):
             raise Exception("Input values shape does not match")
         if in_values.size()[0] != self.in_features:
             in_values = in_values.t()
-        return SparseModuleFunction.apply(in_values, self.weight, self.bias)
+        return SparseModuleFunction.apply(in_values, self.weight, self. training, self.bias)
 
     # Funkcja służąca do nadawania nowych wag, głównie przy inicjalizacji
     # ma automatycznie przekształcać na reprezentację rzadką
@@ -85,8 +86,9 @@ class SparseLayer(nn.Module):
 class SparseModuleFunction(torch.autograd.Function):
 
     @staticmethod
-    def forward(ctx, in_values, weight, bias=None):
+    def forward(ctx, in_values, weight, training, bias=None):
         ctx.save_for_backward(in_values, weight, bias)
+        ctx.training = training
         out = sparse.mm(weight.t(), in_values).t()
         if bias is not None:
             out = torch.add(out, bias)
@@ -95,6 +97,9 @@ class SparseModuleFunction(torch.autograd.Function):
     @staticmethod
     def backward(ctx, grad_output):
         in_values, weight, bias = ctx.saved_tensors
+        training = ctx.training
+        if not training:
+            raise Exception("Training mode is not enabled!")
         grad_in_values = grad_weight = grad_bias = None
         if ctx.needs_input_grad[0]:
             grad_in_values = sparse.mm(weight, grad_output.t())
@@ -104,7 +109,7 @@ class SparseModuleFunction(torch.autograd.Function):
             grad_weight = torch.mm(in_values, grad_output).to_sparse_coo()
         if bias is not None and ctx.needs_input_grad[2]:
             grad_bias = grad_output.sum(0)
-        return grad_in_values, grad_weight, grad_bias
+        return grad_in_values, grad_weight, None, grad_bias
 
 
 def new_random_basic_coo(in_features, out_features, bias=True):
