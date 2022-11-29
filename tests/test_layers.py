@@ -40,6 +40,14 @@ def test_compare_linear():
     assert torch.allclose(linear.forward(data), sparse.forward(data))
 
 
+def test_csr_backward():
+    sparse = layers.new_random_basic_csr(3, 1)
+    data = torch.Tensor([1., 2., 3.])
+    out = sparse(data)
+    out.backward()
+    assert sparse.values.grad is None
+
+
 @pytest.mark.parametrize(
     "size",
     [[3, 1], [3, 2], [3, 4]]

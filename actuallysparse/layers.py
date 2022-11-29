@@ -3,6 +3,7 @@ from typing import Any
 import torch
 from torch import Tensor
 from torch import sparse
+import warnings
 import torch.nn as nn
 
 
@@ -21,6 +22,7 @@ class SparseLayer(nn.Module):
             values = weight.values()
             self.register_buffer('row_indices', weight.crow_indices())
             self.register_buffer('col_indices', weight.col_indices())
+            warnings.warn("WARNING: Training is not supported in csr mode")
         else:
             weight = weight.to_sparse_coo()
             values = weight.values()
