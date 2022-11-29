@@ -2,3 +2,6 @@
 /playground.ipynb
 
 .nni_log/
+.data/
+.weights/
+.pytest_cache/
