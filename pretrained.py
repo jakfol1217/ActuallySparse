@@ -43,10 +43,10 @@ def make_vgg11_bn_layers():
     return nn.Sequential(*layers)
 
 
-def vgg11_bn():
+def vgg11_bn(device="cpu"):
     model = VGG(make_vgg11_bn_layers())
     state_dict = torch.load(
-        ".weights/state_dicts/vgg11_bn.pt", map_location="cpu"
+        ".weights/state_dicts/vgg11_bn.pt", map_location=device
     )
     model.load_state_dict(state_dict)
     return model
