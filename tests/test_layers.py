@@ -80,7 +80,7 @@ def test_pruning(k, tensor_after_pruning):
                       [0.6, 0.7, 0.8, 0.9, 1.]])
     )
     sparse.prune_smallest_values(k)
-    assert torch.allclose(sparse.weight.to_dense(), tensor_after_pruning)
+    assert torch.allclose(sparse.weight.t().to_dense(), tensor_after_pruning)
 
 
 def test_pruning_reduce_size():

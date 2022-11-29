@@ -106,7 +106,7 @@ class SparseLayer(nn.Module):
         else:
             weight = torch.sparse_coo_tensor(indices=self.indices, values=self.values,
                                              size=(self.out_features, self.in_features))
-        return weight.t()
+        return weight
 
 # implementacja funkcjonalności warstwy, a więc przejścia "w przód" oraz "w tył"
 """

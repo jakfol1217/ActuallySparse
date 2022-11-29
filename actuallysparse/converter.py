@@ -43,7 +43,7 @@ def extract_params_dense(layer: Linear):
 
 
 def extract_params_sparse_coo(layer: SparseLayer):
-    return layer.weight.data.to_dense().t(), layer.bias.data.clone().detach()
+    return layer.weight.data.to_dense(), layer.bias.data.clone().detach()
 
 
 extract_params_sparse_csr = extract_params_sparse_coo
