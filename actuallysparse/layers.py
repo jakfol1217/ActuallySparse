@@ -110,6 +110,9 @@ class SparseLayer(nn.Module):
                                              size=(self.out_features, self.in_features))
         return weight
 
+    def __repr__(self):
+        return f"SparseLayer(in_features={self.in_features}, out_features={self.out_features}, bias={self.bias is not None}, csr_mode={self.csr_mode})"
+
 # implementacja funkcjonalności warstwy, a więc przejścia "w przód" oraz "w tył"
 """
 class SparseModuleFunction(torch.autograd.Function):
