@@ -89,7 +89,7 @@ def test_training_after_convert(iris_data):
         loss.backward()
         optimizer.step()
 
-    convert_model(model, nn.Linear, 'coo')
+    model = convert_model(model, nn.Linear, 'coo')
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
     with torch.no_grad():

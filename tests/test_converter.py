@@ -1,6 +1,6 @@
 import pytest
 from torch import nn
-from torch.nn.modules import Linear
+from torch.nn.modules import Linear, Sequential
 import torch
 from actuallysparse import converter
 from actuallysparse.layers import new_random_basic_coo, new_random_basic_csr, SparseLayer
@@ -39,13 +39,27 @@ def test_convert_with_mask(conversion_target):
     assert original.weight.data[1, 1] != 0.
 
 
-def test_model_converter(request):
-
+def test_model_converter():
     model = nn.Sequential(
         Linear(30, 5),
         Linear(5, 4),
         new_random_basic_coo(4, 1)
     )
-    converter.convert_model(model, Linear, 'coo')
+    model = converter.convert_model(model, Linear, 'coo')
     assert all(SparseLayer == type(child) for child in model.children())
+
+
+def test_model_converter_recursion():
+    model = Sequential(
+        Linear(30, 5),
+        Sequential(
+            Linear(5, 4),
+            Linear(4, 6),
+            Linear(6, 4)
+        ),
+        Linear(5, 4),
+        new_random_basic_coo(4, 1)
+    )
+    model = converter.convert_model(model, Linear, 'coo')
+    assert all(SparseLayer == type(child) for child in model[1].children())
 
