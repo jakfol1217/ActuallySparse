@@ -8,10 +8,6 @@ from actuallysparse.layers import new_random_basic_coo, new_random_basic_csr
 from sklearn.datasets import load_iris
 from sklearn.preprocessing import StandardScaler
 
-# CZĘŚĆ JESZCZE NIEZAIMPLEMENTOWANA PRZEZ PROBLEM Z GRADIENTAMI RZADKIMI
-"""
-
-
 LAYER_CONSTRUCTORS = [nn.Linear, new_random_basic_coo]
 
 
@@ -65,4 +61,4 @@ def test_model_improvement(iris_data, model_loss_optimizer):
         loss_end = loss_fn(y_pred, y)
 
     assert (loss_start - loss_end) >= 0.01
-"""
+
