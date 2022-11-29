@@ -19,13 +19,11 @@ def convert(layer: Linear | SparseLayer, convert_target: str, mask: None | Tenso
 
 
 def convert_model(model: Module, module_to_replace: Module, target: str):
-    new_model = copy.deepcopy(model)
-    for i, module in new_model.named_children():
+    for i, module in model.named_children():
         if list(module.children()):
             convert_model(module, module_to_replace, target)
         if type(module) == module_to_replace:
-            setattr(new_model, i, convert(module, target))
-    return new_model
+            setattr(model, i, convert(module, target))
 
 
 def match_extractor(layer):
