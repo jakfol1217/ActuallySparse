@@ -18,18 +18,14 @@ def convert(layer: Linear | SparseLayer, convert_target: str, mask: None | Tenso
     return packager(weight, bias)
 
 
-def convert_model(model: Module, module_to_replace: Module, target: str, inplace=True):
-    if inplace:
-        new_model = model
-    else:
-        new_model = copy.deepcopy(model)
+def convert_model(model: Module, module_to_replace: Module, target: str):
+    new_model = copy.deepcopy(model)
     for i, module in new_model.named_children():
         if list(module.children()):
-            convert_model(module, target)
+            convert_model(module, module_to_replace, target)
         if type(module) == module_to_replace:
             setattr(new_model, i, convert(module, target))
-    if not inplace:
-        return new_model
+    return new_model
 
 
 def match_extractor(layer):

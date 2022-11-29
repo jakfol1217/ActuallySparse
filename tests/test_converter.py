@@ -46,6 +46,6 @@ def test_model_converter(request):
         Linear(5, 4),
         new_random_basic_coo(4, 1)
     )
-    converter.convert_model(model, Linear, 'coo')
+    model = converter.convert_model(model, Linear, 'coo')
     assert all(SparseLayer == type(child) for child in model.children())
 
