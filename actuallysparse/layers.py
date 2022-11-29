@@ -14,7 +14,7 @@ class SparseLayer(nn.Module):
         self.out_features = out_features
         self.csr_mode = csr_mode
         # Inicjalizacja wag
-        weight = torch.FloatTensor(in_features, out_features).uniform_(-1, 1)
+        weight = torch.FloatTensor(out_features, in_features).uniform_(-1, 1)
         weight[torch.where(abs(weight) <= 0.5)] = 0
         if csr_mode:
             weight = weight.to_sparse_csr()
@@ -44,25 +44,22 @@ class SparseLayer(nn.Module):
             in_values = in_values.t()
         if not self.csr_mode:
             weight = torch.sparse_coo_tensor(values=self.values, indices=self.indices,
-                                             size=(self.in_features, self.out_features)).to_dense()
+                                             size=(self.out_features, self.in_features)).to_dense()
         else:
             weight = torch.sparse_csr_tensor(crow_indices=self.row_indices, col_indices=self.col_indices,
-                                             values=self.values, size=(self.in_features, self.out_features)).to_dense()
-        out = torch.mm(in_values, weight)
+                                             values=self.values, size=(self.out_features, self.in_features)).to_dense()
+        out = torch.mm(in_values, weight.t())
         if self.bias is not None:
             out = torch.add(out, self.bias)
         return out
-
-
-        #return SparseModuleFunction.apply(in_values, self.weight, self.bias)
 
     # Funkcja służąca do nadawania nowych wag, głównie przy inicjalizacji
     # ma automatycznie przekształcać na reprezentację rzadką
     def assign_new_weight(self, new_weight, bias=None):
         if not torch.is_tensor(new_weight):
             raise TypeError("New weight must be a Tensor")
-        if new_weight.size() != torch.Size([self.in_features, self.out_features]):
-            if new_weight.t().size() == torch.Size([self.in_features, self.out_features]):
+        if new_weight.size() != torch.Size([self.out_features, self.in_features]):
+            if new_weight.t().size() == torch.Size([self.out_features, self.in_features]):
                 new_weight = new_weight.t()
             else:
                 raise Exception("Weight shape mismatch")
@@ -100,17 +97,16 @@ class SparseLayer(nn.Module):
         mask = self.values.nonzero().view(-1)
         self.values = nn.Parameter(self.values.index_select(0, mask))
         self.indices = self.indices.index_select(1, mask)
-        #self.weight = nn.Parameter(torch.sparse_coo_tensor(new_indexes, new_values,
-                                                           #size=(self.in_features, self.out_features)))
+
     @property
     def weight(self):
         if self.csr_mode:
             weight = torch.sparse_csr_tensor(crow_indices=self.row_indices, col_indices=self.col_indices,
-                                             values=self.values, size=(self.in_features, self.out_features))
+                                             values=self.values, size=(self.out_features, self.in_features))
         else:
             weight = torch.sparse_coo_tensor(indices=self.indices, values=self.values,
-                                             size=(self.in_features, self.out_features))
-        return weight
+                                             size=(self.out_features, self.in_features))
+        return weight.t()
 
 # implementacja funkcjonalności warstwy, a więc przejścia "w przód" oraz "w tył"
 """

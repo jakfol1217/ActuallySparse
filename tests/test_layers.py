@@ -40,20 +40,13 @@ def test_compare_linear():
     assert torch.allclose(linear.forward(data), sparse.forward(data))
 
 
-def test_backward():
-    sparse = layers.new_random_basic_coo(3, 1)
-
-    data = torch.tensor([[1., 2., 3.]])
-
-    res_sparse = sparse.forward(data)
-    res_sparse.backward()
-
-    assert torch.allclose(sparse.values.grad.view(-1, 1), data)
-
-
-def test_compare_linear_backward():
-    linear = Linear(3, 1)
-    sparse = layers.new_random_basic_coo(3, 1)
+@pytest.mark.parametrize(
+    "size",
+    [[3, 1], [3, 2], [3, 4]]
+)
+def test_compare_linear_backward(size):
+    linear = Linear(size[0], size[1])
+    sparse = layers.new_random_basic_coo(size[0], size[1])
 
     sparse.assign_new_weight(
         linear.weight.data,
@@ -65,10 +58,10 @@ def test_compare_linear_backward():
     res_linear = linear.forward(data)
     res_sparse = sparse.forward(data)
 
-    res_linear.backward()
-    res_sparse.backward()
+    res_linear.sum().backward()
+    res_sparse.sum().backward()
 
-    assert torch.allclose(linear.weight.grad, sparse.values.grad)
+    assert torch.allclose(linear.weight.grad, sparse.values.grad.view(size[1], size[0]))
 
 @pytest.mark.parametrize(
     "k, tensor_after_pruning",
@@ -88,6 +81,7 @@ def test_pruning(k, tensor_after_pruning):
     )
     sparse.prune_smallest_values(k)
     assert torch.allclose(sparse.weight.to_dense(), tensor_after_pruning)
+
 
 def test_pruning_reduce_size():
     sparse = layers.new_random_basic_coo(2, 5)
