@@ -5,6 +5,7 @@ from torch.autograd import Variable
 
 from actuallysparse.layers import new_random_basic_coo, new_random_basic_csr
 from actuallysparse.converter import convert_model
+from actuallysparse.layers import set_pruning_mode, disable_pruning_mode
 
 from sklearn.datasets import load_iris
 from sklearn.preprocessing import StandardScaler
@@ -109,3 +110,54 @@ def test_training_after_convert(iris_data):
         loss_end = loss_fn(y_pred, y)
 
     assert (loss_start - loss_mid) >= 0.01 and (loss_mid - loss_end) >= 0.01
+
+
+def test_pruning_mode(iris_data):
+    X, y = iris_data
+    loss_fn = nn.CrossEntropyLoss()
+
+    model = nn.Sequential(
+        new_random_basic_coo(4, 32),
+        nn.Sigmoid(),
+        new_random_basic_coo(32, 3),
+        nn.Softmax(dim=1)
+    )
+
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+
+    handles = set_pruning_mode(model)
+    values_start = list(model.children())[0].values
+    with torch.no_grad():
+        y_pred = model(X)
+        loss_start = loss_fn(y_pred, y)
+
+    for i in range(5):
+        y_pred = model(X)
+        loss = loss_fn(y_pred, y)
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+    disable_pruning_mode(model, handles)
+    values_end = list(model.children())[0].values
+
+    with torch.no_grad():
+        y_pred = model(X)
+        loss_mid = loss_fn(y_pred, y)
+
+    for i in range(100):
+        y_pred = model(X)
+        loss = loss_fn(y_pred, y)
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+    with torch.no_grad():
+        y_pred = model(X)
+        loss_end = loss_fn(y_pred, y)
+
+    assert len(values_start) > len(values_end)
+    assert loss_start == loss_mid
+    assert (loss_mid - loss_end) >= 0.01

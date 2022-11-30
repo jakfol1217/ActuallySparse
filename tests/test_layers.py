@@ -87,7 +87,8 @@ def test_pruning(k, tensor_after_pruning):
         torch.Tensor([[0.1, 0.2, 0.3, 0.4, 0.5],
                       [0.6, 0.7, 0.8, 0.9, 1.]])
     )
-    sparse.prune_smallest_values(k)
+    sparse.set_k(k)
+    sparse.prune_smallest_values()
     assert torch.allclose(sparse.weight.t().to_dense(), tensor_after_pruning)
 
 
@@ -97,5 +98,14 @@ def test_pruning_reduce_size():
         torch.Tensor([[0.1, 0.2, 0.3, 0.4, 0.5],
                       [0.6, 0.7, 0.8, 0.9, 1.]])
     )
-    sparse.prune_smallest_values(0.5)
+    sparse.set_k(0.5)
+    sparse.prune_smallest_values()
     assert len(sparse.weight.coalesce().values()) == 5
+
+
+def test_pruning_grad_retention():
+    sparse = layers.new_random_basic_coo(3, 5)
+    data = torch.Tensor([1., 2., 3.])
+    sparse.values.requires_grad_(False)
+    sparse.prune_smallest_values()
+    assert not sparse.values.requires_grad
