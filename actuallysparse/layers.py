@@ -9,7 +9,7 @@ import torch.nn as nn
 
 # Klasa implementująca samą warstwę, tzn. m.in. przechowywanie parametrów
 class SparseLayer(nn.Module):
-    def __init__(self, in_features, out_features, bias=True, csr_mode=False, k = 0.1):
+    def __init__(self, in_features, out_features, bias=True, csr_mode=False, k=0.1):
         super(SparseLayer, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
@@ -120,11 +120,15 @@ class SparseLayer(nn.Module):
         self.k = k
 
 
+def _pruning_hook(layer: SparseLayer, _, __):
+    layer.prune_smallest_values()
+
+
 class Pruner(nn.Module):
     def __init__(self, model):
         super().__init__()
         self.model = model
-        self.handles = self._register_hooks_recursive_to_sparse(self.model, self._pruning_hook)
+        self.handles = self._register_hooks_recursive_to_sparse(self.model, _pruning_hook)
 
     def forward(self, input):
         return self.model(input)
@@ -135,17 +139,13 @@ class Pruner(nn.Module):
             if list(module.children()):
                 handles.extend(self._register_hooks_recursive(module, hook))
             if type(module) == SparseLayer:
-                handle = module.register_forward_hook(self._pruning_hook)
+                handle = module.register_forward_hook(_pruning_hook)
                 handles.append(handle)
         return handles
-
-    def _pruning_hook(self, layer: nn.Module, _, __):
-        layer.prune_smallest_values()
 
     def remove_hooks(self):
         for handle in self.handles:
             handle.remove()
-
 
 
 def new_random_basic_coo(in_features, out_features, bias=True):
