@@ -148,6 +148,6 @@ def test_pruning_mode(iris_data):
 
     assert list(model.children())[0].values.requires_grad
     assert len(values_start) > len(values_end)
-    assert (loss_start - loss_end) >= 0.01
+    assert (loss_start - loss_end) >= 0.001
 
 
