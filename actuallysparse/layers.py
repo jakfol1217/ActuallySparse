@@ -97,7 +97,9 @@ class SparseLayer(nn.Module):
         if self.csr_mode:
             raise Exception("Cannot remove zeroes with csr mode on")
         mask = self.values.nonzero().view(-1)
+        require_grad = self.values.requires_grad
         self.values = nn.Parameter(self.values.index_select(0, mask))
+        self.values.requires_grad = require_grad
         self.indices = self.indices.index_select(1, mask)
 
     @property
