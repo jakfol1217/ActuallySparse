@@ -120,40 +120,32 @@ class SparseLayer(nn.Module):
         self.k = k
 
 
-def set_pruning_mode(model: nn.Module):
-    handles = []
-    for i, module in model.named_children():
-        if list(module.children()):
-            handles.extend(set_pruning_mode(module))
-        if type(module) == SparseLayer:
-            module.values.requires_grad_(False)
-            #for parameter in module.parameters():
-            #    parameter.requires_grad_(False)
+class Pruner(nn.Module):
+    def __init__(self, model):
+        super().__init__()
+        self.model = model
+        self.handles = self._register_hooks_recursive_to_sparse(self.model, self._pruning_hook)
 
-            handle = module.register_forward_hook(_pruning_hook)
-            handles.append(handle)
-    return handles
+    def forward(self, input):
+        return self.model(input)
 
-
-def disable_pruning_mode(model: nn.Module, handles):
-    def activate_gradients(model):
+    def _register_hooks_recursive_to_sparse(self, model, hook):
+        handles = []
         for i, module in model.named_children():
             if list(module.children()):
-                activate_gradients(module)
+                handles.extend(self._register_hooks_recursive(module, hook))
             if type(module) == SparseLayer:
-                module.values.requires_grad_(True)
-    for handle in handles:
-        handle.remove()
-    activate_gradients(model)
+                handle = module.register_forward_hook(self._pruning_hook)
+                handles.append(handle)
+        return handles
 
+    def _pruning_hook(self, layer: nn.Module, _, __):
+        layer.prune_smallest_values()
 
-def _pruning_hook(layer: nn.Module, _, __):
-    layer.prune_smallest_values()
+    def remove_hooks(self):
+        for handle in self.handles:
+            handle.remove()
 
-#def _backward_bias_hook(layer: nn.Module, _, __):
-#    input_grad, weight_grad, bias_grad = in_grads
-#    bias_grad = 0
-#    return input_grad, weight_grad, bias_grad
 
 
 def new_random_basic_coo(in_features, out_features, bias=True):
