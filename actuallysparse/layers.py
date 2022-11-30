@@ -150,10 +150,10 @@ def disable_pruning_mode(model: nn.Module, handles):
 def _pruning_hook(layer: nn.Module, _, __):
     layer.prune_smallest_values()
 
-def _backward_bias_hook(layer: nn.Module, _, __):
-    input_grad, weight_grad, bias_grad = in_grads
-    bias_grad = 0
-    return input_grad, weight_grad, bias_grad
+#def _backward_bias_hook(layer: nn.Module, _, __):
+#    input_grad, weight_grad, bias_grad = in_grads
+#    bias_grad = 0
+#    return input_grad, weight_grad, bias_grad
 
 
 def new_random_basic_coo(in_features, out_features, bias=True):
