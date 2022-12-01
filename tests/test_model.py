@@ -117,9 +117,9 @@ def test_pruning_mode(iris_data):
     loss_fn = nn.CrossEntropyLoss()
 
     model = nn.Sequential(
-        new_random_basic_coo(4, 32),
+        new_random_basic_coo(4, 64),
         nn.Sigmoid(),
-        new_random_basic_coo(32, 3),
+        new_random_basic_coo(64, 3),
         nn.Softmax(dim=1)
     )
 
@@ -130,7 +130,7 @@ def test_pruning_mode(iris_data):
     pruner = Pruner(model)
     pruner(X)
     pruner.remove_hooks()
-    values_end = list(model.children())[0].values
+    values_mid = list(model.children())[0].values
     with torch.no_grad():
         y_pred = model(X)
         loss_start = loss_fn(y_pred, y)
@@ -145,9 +145,11 @@ def test_pruning_mode(iris_data):
     with torch.no_grad():
         y_pred = model(X)
         loss_end = loss_fn(y_pred, y)
+    values_end = list(model.children())[0].values
 
     assert list(model.children())[0].values.requires_grad
-    assert len(values_start) > len(values_end)
-    assert (loss_start - loss_end) >= 0.001
+    assert len(values_start) > len(values_mid)
+    assert len(values_mid) == len(values_end)
+    assert (loss_start - loss_end) >= 0.01
 
 
