@@ -124,11 +124,11 @@ def _pruning_hook(layer: SparseLayer, _, __):
     layer.prune_smallest_values()
 
 
-def prune_model(model: nn.Module):
-    input_data = torch.ones(list(model.children())[0].in_features)
+def prune_model(model: nn.Module, dummy_input: torch.Tensor):
     pruner = Pruner(model)
-    pruner(input_data)
+    pruner(dummy_input)
     pruner.remove_hooks()
+
 
 class Pruner(nn.Module):
     def __init__(self, model):

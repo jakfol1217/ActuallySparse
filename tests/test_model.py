@@ -126,7 +126,7 @@ def test_pruning_mode(iris_data):
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
     values_start = list(model.children())[0].values
-    prune_model(model)
+    prune_model(model, X)
     values_mid = list(model.children())[0].values
 
     with torch.no_grad():
