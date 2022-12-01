@@ -6,6 +6,7 @@ from torch.autograd import Variable
 from actuallysparse.layers import new_random_basic_coo, new_random_basic_csr
 from actuallysparse.converter import convert_model
 from actuallysparse.layers import prune_model
+from pretrained import vgg11_bn
 
 from sklearn.datasets import load_iris
 from sklearn.preprocessing import StandardScaler
@@ -149,5 +150,17 @@ def test_pruning_mode(iris_data):
     assert len(values_start) > len(values_mid)
     assert len(values_mid) == len(values_end)
     assert (loss_start - loss_end) >= 0.01
+
+# Sprawdzenie czy funkcje działają na wytrenowanym już modelu
+def test_pretrained_model_convert_and_prune():
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = vgg11_bn(device=device, weights_path="../.weights/state_dicts/vgg11_bn.pt")
+    model.classifier = convert_model(model.classifier, nn.Linear, 'coo')
+    dummy_input = torch.ones(512)
+    values_start = list(model.classifier.children())[0].values
+    prune_model(model.classifier, dummy_input)
+    values_end = list(model.classifier.children())[0].values
+    assert len(values_start) > len(values_end)
+
 
 
