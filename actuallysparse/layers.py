@@ -9,7 +9,7 @@ import torch.nn as nn
 
 # Klasa implementująca samą warstwę, tzn. m.in. przechowywanie parametrów
 class SparseLayer(nn.Module):
-    def __init__(self, in_features, out_features, bias=True, csr_mode=False, k=0.1):
+    def __init__(self, in_features, out_features, bias=True, csr_mode=False, k=0.05):
         super(SparseLayer, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
@@ -17,7 +17,7 @@ class SparseLayer(nn.Module):
         self.k = k
         # Inicjalizacja wag
         weight = torch.FloatTensor(out_features, in_features).uniform_(-1, 1)
-        weight[torch.where(abs(weight) <= 0.5)] = 0
+        weight[torch.where(abs(weight) <= 0.2)] = 0
         if csr_mode:
             weight = weight.to_sparse_csr()
             values = weight.values()
