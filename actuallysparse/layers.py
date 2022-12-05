@@ -124,6 +124,7 @@ def prune_model(model: nn.Module, dummy_input: torch.Tensor):
     pruner = Pruner(model)
     pruner(dummy_input)
     pruner.remove_hooks()
+    model.zero_grad()
 
 
 class Pruner(nn.Module):
