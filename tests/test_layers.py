@@ -105,7 +105,6 @@ def test_pruning_reduce_size():
 
 def test_pruning_grad_retention():
     sparse = layers.new_random_basic_coo(3, 5)
-    data = torch.Tensor([1., 2., 3.])
     sparse.values.requires_grad_(False)
     sparse.prune_smallest_values()
     assert not sparse.values.requires_grad
