@@ -75,7 +75,7 @@ def package_params_dense(weight, bias):
 def package_params_sparse(weight, bias, constructor):
     out_features, in_features = weight.size()
     converted_layer = constructor(in_features, out_features)
-    converted_layer.assign_new_weight(weight.t(), bias=bias)
+    converted_layer.assign_new_weight(weight, bias=bias)
 
     return converted_layer
 

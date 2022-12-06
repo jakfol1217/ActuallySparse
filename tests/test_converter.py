@@ -23,6 +23,22 @@ def test_convert_range(layer_constructor, conversion_target):
     assert torch.allclose(original.forward(data), converted.forward(data))
 
 
+@pytest.mark.parametrize(
+    "layer_constructor, conversion_target, size",
+    [
+        (constructor, target, size)
+        for constructor in [Linear, new_random_basic_coo, new_random_basic_csr]
+        for target in ["dense", "coo", "csr"]
+        for size in [(3, 3), (3, 4)]
+    ]
+)
+def test_convert_weights(layer_constructor, conversion_target, size):
+    original = layer_constructor(size[0], size[1])
+    converted = converter.convert(original, conversion_target)
+
+    assert torch.allclose(original.weight.to_dense(), converted.weight.to_dense())
+
+
 def test_unknown_target():
     with pytest.raises(TypeError):
         converter.convert(Linear(1, 1), "not_a_type")

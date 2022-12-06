@@ -162,5 +162,32 @@ def test_pretrained_model_convert_and_prune():
     values_end = list(model.classifier.children())[0].values
     assert len(values_start) > len(values_end)
 
+def test_converted_model_forward(iris_data):
+    X, y = iris_data
+    loss_fn = nn.CrossEntropyLoss()
+
+    model = nn.Sequential(
+        nn.Linear(4, 32),
+        nn.Sigmoid(),
+        nn.Linear(32, 3),
+        nn.Softmax(dim=1)
+    )
+
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+
+    for i in range(100):
+        y_pred = model(X)
+        loss = loss_fn(y_pred, y)
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+    output_dense = model(X)
+    model = convert_model(model, nn.Linear, 'coo')
+    output_sparse = model(X)
+    assert torch.allclose(output_dense, output_sparse)
+
+
 
 

@@ -57,7 +57,7 @@ class SparseLayer(nn.Module):
     def assign_new_weight(self, new_weight, bias=None):
         if not torch.is_tensor(new_weight):
             raise TypeError("New weight must be a Tensor")
-        if new_weight.size() != torch.Size([self.out_features, self.in_features]):
+        if self.out_features != self.in_features and new_weight.size() != torch.Size([self.out_features, self.in_features]):
             if new_weight.t().size() == torch.Size([self.out_features, self.in_features]):
                 new_weight = new_weight.t()
             else:
