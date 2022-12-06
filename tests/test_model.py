@@ -113,7 +113,7 @@ def test_training_after_convert(iris_data):
     assert (loss_start - loss_mid) >= 0.01 and (loss_mid - loss_end) >= 0.01
 
 
-def test_pruning_mode(iris_data):
+def test_model_pruning(iris_data):
     X, y = iris_data
     loss_fn = nn.CrossEntropyLoss()
 
