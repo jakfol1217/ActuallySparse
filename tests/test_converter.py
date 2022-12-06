@@ -81,8 +81,6 @@ def test_model_converter_recursion():
 
 
 def test_converted_model_forward():
-    loss_fn = nn.CrossEntropyLoss()
-
     model = nn.Sequential(
         Linear(3, 5),
         Linear(5, 4),
