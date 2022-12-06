@@ -6,6 +6,7 @@ from actuallysparse import converter
 from actuallysparse.layers import new_random_basic_coo, new_random_basic_csr, SparseLayer
 
 
+
 @pytest.mark.parametrize(
     "layer_constructor, conversion_target",
     [
@@ -21,7 +22,6 @@ def test_convert_range(layer_constructor, conversion_target):
     converted = converter.convert(original, conversion_target)
 
     assert torch.allclose(original.forward(data), converted.forward(data))
-
 
 @pytest.mark.parametrize(
     "layer_constructor, conversion_target, size",
@@ -78,4 +78,21 @@ def test_model_converter_recursion():
     )
     model = converter.convert_model(model, Linear, 'coo')
     assert all(SparseLayer == type(child) for child in model[1].children())
+
+
+def test_converted_model_forward():
+    loss_fn = nn.CrossEntropyLoss()
+
+    model = nn.Sequential(
+        Linear(3, 5),
+        Linear(5, 4),
+        new_random_basic_coo(4, 1)
+    )
+
+    data = torch.Tensor([[1., 2., 3.]])
+
+    output_dense = model(data)
+    model = converter.convert_model(model, nn.Linear, 'coo')
+    output_sparse = model(data)
+    assert torch.allclose(output_dense, output_sparse)
 
