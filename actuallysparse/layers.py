@@ -5,11 +5,12 @@ import torch.nn as nn
 
 # Klasa implementująca samą warstwę, tzn. m.in. przechowywanie parametrów
 class SparseLayer(nn.Module):
-    def __init__(self, in_features, out_features, bias=True, csr_mode=False, k=0.05):
+    def __init__(self, in_features, out_features, bias=True, csr_mode=False, sparse_forward = False, k=0.05):
         super(SparseLayer, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
         self.csr_mode = csr_mode
+        self.sparse_forward = sparse_forward
         self.k = k
         # Inicjalizacja wag
         weight = torch.FloatTensor(out_features, in_features).uniform_(-1, 1)
@@ -43,10 +44,12 @@ class SparseLayer(nn.Module):
             in_values = in_values.t()
         if not self.csr_mode:
             weight = torch.sparse_coo_tensor(values=self.values, indices=self.indices,
-                                             size=(self.out_features, self.in_features)).to_dense()
+                                             size=(self.out_features, self.in_features))
         else:
             weight = torch.sparse_csr_tensor(crow_indices=self.row_indices, col_indices=self.col_indices,
-                                             values=self.values, size=(self.out_features, self.in_features)).to_dense()
+                                             values=self.values, size=(self.out_features, self.in_features))
+        if not self.sparse_forward:
+            weight = weight.to_dense()
         out = torch.mm(in_values, weight.t())
         if self.bias is not None:
             out = torch.add(out, self.bias)
