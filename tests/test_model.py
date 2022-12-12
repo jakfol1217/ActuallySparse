@@ -126,9 +126,9 @@ def test_model_pruning(iris_data):
 
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-    values_start = list(model.children())[0].values
+    values_start = model[0].values
     prune_model(model, X)
-    values_mid = list(model.children())[0].values
+    values_mid = model[0].values
 
     with torch.no_grad():
         y_pred = model(X)
@@ -144,7 +144,7 @@ def test_model_pruning(iris_data):
     with torch.no_grad():
         y_pred = model(X)
         loss_end = loss_fn(y_pred, y)
-    values_end = list(model.children())[0].values
+    values_end = model[0].values
 
     assert values_mid.requires_grad
     assert len(values_start) > len(values_mid)
@@ -157,9 +157,9 @@ def test_pretrained_model_convert_and_prune():
     model = vgg11_bn(device=device, weights_path="../.weights/state_dicts/vgg11_bn.pt")
     model.classifier = convert_model(model.classifier, nn.Linear, 'coo')
     dummy_input = torch.ones(512)
-    values_start = list(model.classifier.children())[0].values
+    values_start = model.classifier[0].values
     prune_model(model.classifier, dummy_input)
-    values_end = list(model.classifier.children())[0].values
+    values_end = model.classifier[0].values
     assert len(values_start) > len(values_end)
 
 

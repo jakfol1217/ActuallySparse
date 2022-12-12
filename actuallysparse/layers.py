@@ -98,7 +98,8 @@ class SparseLayer(nn.Module):
         require_grad = self.values.requires_grad
         self.values = nn.Parameter(self.values.index_select(0, mask))
         self.values.requires_grad_(require_grad)
-        self.indices = self.indices.index_select(1, mask)
+        indices = self.indices.index_select(1, mask)
+        self.register_buffer('indices', indices)
 
     @property
     def weight(self):
@@ -142,8 +143,8 @@ class Pruner(nn.Module):
         self.model = model
         self.handles = self._register_hooks_recursive_to_sparse(self.model, _pruning_hook)
 
-    def forward(self, input):
-        return self.model(input)
+    def forward(self, input_vals):
+        return self.model(input_vals)
 
     def _register_hooks_recursive_to_sparse(self, model, hook):
         handles = []
