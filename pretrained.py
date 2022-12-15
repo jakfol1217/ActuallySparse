@@ -110,7 +110,7 @@ def get_pretrained_transformed_vgg(database_name):
     elif database_name == "cifar100":
         model = TransformedVgg(model, 1000, 100)
     elif database_name == "caltech256":
-        model = TransformedVgg(model, 1000, 257) #lub 256
+        model = TransformedVgg(model, 1000, 257)
     else:
         raise Exception("Unknown database name passed")
     return model
