@@ -65,7 +65,6 @@ def load_cifar10_dataloaders():
 
 def load_cifar100_dataloaders():
     transform = torchvision.transforms.Compose([
-        #transforms.Resize((227,227)),
         torchvision.transforms.ToTensor(),
         torchvision.transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
     ])
@@ -77,8 +76,9 @@ def load_cifar100_dataloaders():
 
 def load_caltech256_dataloaders():
     transform = torchvision.transforms.Compose([
-        #torchvision.transforms.Resize((224, 224)),
+        torchvision.transforms.Resize((224, 224)),
         torchvision.transforms.ToTensor(),
+        torchvision.transforms.Lambda(lambda x: x.repeat(3, 1, 1) if x.size(0) == 1 else x),
         torchvision.transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
     ])
     dataset = torchvision.datasets.Caltech256(".data", download=True, transform=transform)
@@ -102,3 +102,15 @@ class TransformedVgg(nn.Module):
         x = self.classifier(x)
         x = self.extra_layer(x)
         return x
+
+def get_pretrained_transformed_vgg(database_name):
+    model = torchvision.models.vgg11_bn(weights=torchvision.models.VGG11_BN_Weights.IMAGENET1K_V1)
+    if database_name == "cifar10":
+        model = TransformedVgg(model, 1000, 10)
+    elif database_name == "cifar100":
+        model = TransformedVgg(model, 1000, 100)
+    elif database_name == "caltech256":
+        model = TransformedVgg(model, 1000, 257) #lub 256
+    else:
+        raise Exception("Unknown database name passed")
+    return model
