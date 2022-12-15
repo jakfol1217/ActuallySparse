@@ -86,3 +86,19 @@ def load_caltech256_dataloaders():
     dataloader_train = torch.utils.data.DataLoader(dataset_train, batch_size=16)
     dataloader_test = torch.utils.data.DataLoader(dataset_test, batch_size=16)
     return dataloader_train, dataloader_test
+
+class TransformedVgg(nn.Module):
+    def __init__(self, model, prev_out_features, new_out_features):
+        super(TransformedVgg, self).__init__()
+        self.features = model.features
+        self.avgpool = model.avgpool
+        self.classifier = model.classifier
+        self.extra_layer = nn.Linear(prev_out_features, new_out_features)
+
+    def forward(self, x):
+        x = self.features(x)
+        x = self.avgpool(x)
+        x = x.view(x.size(0), -1)
+        x = self.classifier(x)
+        x = self.extra_layer(x)
+        return x
