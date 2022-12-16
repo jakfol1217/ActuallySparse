@@ -5,3 +5,4 @@
 .data/
 .weights/
 .pytest_cache/
+/preze_test.ipynb

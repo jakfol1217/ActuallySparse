@@ -123,7 +123,7 @@ class SparseLayer(nn.Module):
         return weight
 
     def __repr__(self):
-        return f"SparseLayer(in_features={self.in_features}, out_features={self.out_features}, bias={self.bias is not None}, csr_mode={self.csr_mode}, k={self.k}, train_mode={self.train_mode})"
+        return f"SparseLayer(in_features={self.in_features}, out_features={self.out_features}, bias={self.bias is not None}, csr_mode={self.csr_mode}, k={self.k})"
 
     # Funkcje ustawiające parametry sieci
     def set_k(self, k):
