@@ -1,6 +1,9 @@
+import math
 import torch
 import warnings
 import torch.nn as nn
+import numpy as np
+
 
 
 # Klasa implementująca samą warstwę, tzn. m.in. przechowywanie parametrów
@@ -83,9 +86,15 @@ class SparseLayer(nn.Module):
 
     # Ustawia k procent najmniejszych wartości na 0
     def prune_smallest_values(self, remove_zeros=True):
+        num_elements_to_prune = math.floor(self.k * self.in_features * self.out_features)
         with torch.no_grad():
-            values = self.values
-            values[abs(values) < torch.quantile(abs(values), q=self.k)] = 0
+            values = self.values.numpy()
+            num_non_zero_values = len(values)
+            if num_non_zero_values <= num_elements_to_prune:
+                self.values[self.values!=0] = 0
+            else:
+                indexes_to_prune = np.argpartition(values, num_elements_to_prune)[:num_elements_to_prune]
+                self.values[np.sort(indexes_to_prune)] = 0
         if remove_zeros:
             self.remove_zeros_from_weight()
 
