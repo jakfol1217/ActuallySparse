@@ -53,7 +53,9 @@ class SparseLayer(nn.Module):
                                              values=self.values, size=(self.out_features, self.in_features))
         if self.train_mode:
             weight = weight.to_dense()
-        out = torch.mm(in_values, weight.t())
+            out = torch.mm(in_values, weight.t())
+        else:
+            out = torch.sparse.mm(weight, in_values.t()).t()
         if self.bias is not None:
             out = torch.add(out, self.bias)
         return out
@@ -121,17 +123,17 @@ class SparseLayer(nn.Module):
         return weight
 
     def __repr__(self):
-        return f"SparseLayer(in_features={self.in_features}, out_features={self.out_features}, bias={self.bias is not None}, csr_mode={self.csr_mode}, k={self.k})"
+        return f"SparseLayer(in_features={self.in_features}, out_features={self.out_features}, bias={self.bias is not None}, csr_mode={self.csr_mode}, k={self.k}, train_mode={self.train_mode})"
 
     # Funkcje ustawiające parametry sieci
     def set_k(self, k):
         if k < 0 or k > 1:
             raise Exception("K must be a value between 0 and 1")
         self.k = k
-    def train(self):
-        self.train_mode = False
-    def eval(self):
-        self.train_mode = True
+    def train(self, mode = True):
+        self.train_mode = mode
+    def eval(self, mode = True):
+        self.train_mode = not mode
 
 
 
