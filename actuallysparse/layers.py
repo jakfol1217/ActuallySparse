@@ -147,6 +147,10 @@ def prune_model(model: nn.Module, dummy_input: torch.Tensor):
     pruner.remove_hooks()
     model.zero_grad()
 
+def set_global_k(model, k):
+    for child in model.children():
+        if type(child) is SparseLayer:
+            child.set_k(k)
 
 class Pruner(nn.Module):
     def __init__(self, model):
