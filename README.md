@@ -19,7 +19,7 @@ Projekt związany z pracą inżynierską pt. "*Zastosowanie metod redukcji wielk
     - *generate_baselines.ipynb* - utworzenie i wytrenowanie podstawowych modeli o różnych stopniach rzadkości, służących jako "baza porównawcza" dla dalszych analiz.
     - *integrate.ipynb* -
     - *memory.ipynb* - analizy zajętości pamięciowej modeli poddanych zmniejszeniu.
-    - *pretrained.py* - funkcje zawierające architekrurę gotowego modelu wykorzystywanego do analiz, tzn. **VGG11_bn**
+    - *pretrained.py* - funkcje zawierające architekrurę gotowego modelu wykorzystywanego do analiz, tzn. **VGG11_bn**.
     - *sparse_loop.ipynb* -
     - *sparsify.ipynb* -
   
