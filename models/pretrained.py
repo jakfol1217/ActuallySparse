@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torchvision
 
-
+ # Klasa reprezentująca wykorzystywaną architekturę VGG
 class VGG(nn.Module):
     def __init__(self, features, num_classes=10):
         super(VGG, self).__init__()
@@ -29,7 +29,7 @@ class VGG(nn.Module):
         x = self.classifier(x)
         return x
 
-
+ # Funkcja tworząca część konwolucyjną archiektury VGG11_bn, wykorzystywana w klasie VGG
 def make_vgg11_bn_layers():
     cfg = [64, "M", 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"]
     layers = []
@@ -43,7 +43,7 @@ def make_vgg11_bn_layers():
             in_channels = v
     return nn.Sequential(*layers)
 
-
+ # Funkcja zwracająca model VGG11_bn
 def vgg11_bn(device="cpu", weights_path = ".weights/state_dicts/vgg11_bn.pt"):
     model = VGG(make_vgg11_bn_layers())
     state_dict = torch.load(
@@ -52,6 +52,7 @@ def vgg11_bn(device="cpu", weights_path = ".weights/state_dicts/vgg11_bn.pt"):
     model.load_state_dict(state_dict)
     return model
 
+ # Funkcja zwracająca dane ze zbioru Cifar-10
 def load_cifar10_dataloaders():
     transform = torchvision.transforms.Compose([
         torchvision.transforms.ToTensor(),
@@ -63,6 +64,7 @@ def load_cifar10_dataloaders():
     dataloader_test = torch.utils.data.DataLoader(dataset_test, batch_size=16)
     return dataloader_train, dataloader_test
 
+ # Funkcja zwracająca dane ze zbioru Cifar-100
 def load_cifar100_dataloaders():
     transform = torchvision.transforms.Compose([
         torchvision.transforms.ToTensor(),
@@ -74,6 +76,7 @@ def load_cifar100_dataloaders():
     dataloader_test = torch.utils.data.DataLoader(dataset_test, batch_size=64)
     return dataloader_train, dataloader_test
 
+ # Funkcja zwracająca dane ze zbioru Caltech-256
 def load_caltech256_dataloaders():
     transform = torchvision.transforms.Compose([
         torchvision.transforms.Resize((224, 224)),
@@ -87,6 +90,7 @@ def load_caltech256_dataloaders():
     dataloader_test = torch.utils.data.DataLoader(dataset_test, batch_size=16)
     return dataloader_train, dataloader_test
 
+ # Klasa reprezentująca model VGG dostosowany do innych zbiorów danych (innych niż podstawowy w projekcie Cifar-10)
 class TransformedVgg(nn.Module):
     def __init__(self, model, prev_out_features, new_out_features):
         super(TransformedVgg, self).__init__()
@@ -103,6 +107,7 @@ class TransformedVgg(nn.Module):
         x = self.extra_layer(x)
         return x
 
+ # Funkcja zwracająca model VGG dostosowany do wskazanego zbioru danych
 def get_pretrained_transformed_vgg(database_name):
     model = torchvision.models.vgg11_bn(weights=torchvision.models.VGG11_BN_Weights.IMAGENET1K_V1)
     if database_name == "cifar10":

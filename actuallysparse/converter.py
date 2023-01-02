@@ -6,7 +6,7 @@ from torch.nn.modules import Linear
 from torch.nn import Module
 from torch import Tensor
 
-
+ # Funkcja konwertująca warstwy
 def convert(layer: Linear | SparseLayer, convert_target: str, mask: None | Tensor = None):
     extractor = match_extractor(layer)
     packager = match_packager(convert_target)
@@ -17,7 +17,7 @@ def convert(layer: Linear | SparseLayer, convert_target: str, mask: None | Tenso
 
     return packager(weight, bias)
 
-
+ # Funkcja konwertująca cały model
 def convert_model(model: Module, module_to_replace: Module, target: str):
     new_model = copy.deepcopy(model)
     for i, module in new_model.named_children():
@@ -27,7 +27,7 @@ def convert_model(model: Module, module_to_replace: Module, target: str):
             setattr(new_model, i, convert(module, target))
     return new_model
 
-
+ # Funkcja sprawdzająca i dopasowująca warstwę, która ma zostać poddana konwersji
 def match_extractor(layer):
     if isinstance(layer, Linear):
         return extract_params_dense
@@ -38,7 +38,7 @@ def match_extractor(layer):
     else:
         raise TypeError("Convert module requires layer to be Linear or SparseLayer")
 
-
+ # Funkcja sprawdzająca i dopasowująca cel konwersji
 def match_packager(convert_target: str):
     if convert_target == "dense":
         return package_params_dense
@@ -49,19 +49,19 @@ def match_packager(convert_target: str):
     else:
         raise TypeError(f"Unknown convert_target: '{convert_target}'")
 
-
+ # Funkcja pozyskująca parametry warstwy gęstej
 def extract_params_dense(layer: Linear):
     # Klonowanie wartości, a nie tylko referencji, żeby operacje wykonane na jednej z warstw nie miały wpływu na drugą
     return layer.weight.data.clone().detach(), layer.bias.data.clone().detach()
 
-
+ # Funkcja pozyskująca parametry warstwy rzadkiej
 def extract_params_sparse_coo(layer: SparseLayer):
     return layer.weight.data.to_dense(), layer.bias.data.clone().detach()
 
 
 extract_params_sparse_csr = extract_params_sparse_coo
 
-
+# Funkcja przypisująca parametry w warstwie gęstej
 def package_params_dense(weight, bias):
     out_features, in_features = weight.size()
     converted_layer = Linear(in_features, out_features)
@@ -71,7 +71,7 @@ def package_params_dense(weight, bias):
 
     return converted_layer
 
-
+# Funkcja przypisująca parametry w warstwie rzadkiej
 def package_params_sparse(weight, bias, constructor):
     out_features, in_features = weight.size()
     converted_layer = constructor(in_features, out_features)

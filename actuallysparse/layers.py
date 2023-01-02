@@ -8,7 +8,20 @@ import numpy as np
 
 # Klasa implementująca samą warstwę, tzn. m.in. przechowywanie parametrów
 class SparseLayer(nn.Module):
-    def __init__(self, in_features, out_features, bias=True, csr_mode=False, train_mode = True, k=0.05):
+    def __init__(self, in_features: int, out_features: int, bias: bool=True, csr_mode: bool=False, train_mode: bool = True, k: float=0.05):
+        ### OPIS PARAMETRÓW ###
+        # in_features - liczba parametrów wejściowych
+        # out_feaatures - liczba parametrów wyjściowych (do następnej warstwy)
+        # bias - flaga stwierdzająca, czy warstwa ma posiadać wektor bias'u
+        # csr_mode - flaga stwierdzająca, czy warstwa ma przechowywać wagi w reprezentacji CSR (true) czy COO (false)
+        # train_mode - flaga stwierdzająca, czy warstwa jest w trybie treningu (wiąże się to m.in. z posobem przejścia "w przód"
+        # k - wartość stanowiąca, jaki % parametrów warstwy ma zostać usunięty metodą "prune_smallest_values"
+        ###
+        ### SZCZEGÓŁY DZIAŁANIA ###
+        # Klasa reprezentuje warstwę z macierzą wag rozmiaru in_features x out_features oraz opcjonalnym wektorem bias'u
+        # Parametry klasy (pojęcie z biblioteki PyTorch) różnią się w zależności od implementacji
+        # Wagi inicjalizowane są w sposób losowy, a następnie elementy których absolutna wartość jest niewiększa niż 0.2 są zerowane
+        ###
         super(SparseLayer, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
@@ -36,6 +49,7 @@ class SparseLayer(nn.Module):
         else:
             self.register_parameter('bias', None)
 
+    # Funkcja reprezentująca "przejście w przód"
     def forward(self, in_values):
         if not torch.is_tensor(in_values):
             raise TypeError("Input must be a Tensor")
@@ -61,7 +75,7 @@ class SparseLayer(nn.Module):
         return out
 
     # Funkcja służąca do nadawania nowych wag, głównie przy inicjalizacji
-    # ma automatycznie przekształcać na reprezentację rzadką
+    # Funkcja ta ma automatycznie przekształcać na reprezentację rzadką
     def assign_new_weight(self, new_weight, bias=None):
         if not torch.is_tensor(new_weight):
             raise TypeError("New weight must be a Tensor")
@@ -140,18 +154,21 @@ class SparseLayer(nn.Module):
 def _pruning_hook(layer: SparseLayer, _, __):
     layer.prune_smallest_values()
 
-
+ # Funkcja globalna służąca do zmniejszania wartości modelu (potrzebuje przykładowych wartości wejściowych, tzn. "dummy input")
+ # "Opakowanie" klasy Pruner
 def prune_model(model: nn.Module, dummy_input: torch.Tensor):
     pruner = Pruner(model)
     pruner(dummy_input)
     pruner.remove_hooks()
     model.zero_grad()
 
-def set_global_k(model, k):
+ # Funkcja ustawiająca globalną wartość paramtru k w warstwach rzadkich modelu
+def set_global_k(model: nn.Module, k: float):
     for child in model.children():
         if type(child) is SparseLayer:
             child.set_k(k)
 
+ # Klasa zmniejszająca wielkość warstw rzadkich w zadanym jako argument modelu
 class Pruner(nn.Module):
     def __init__(self, model):
         super().__init__()
@@ -175,10 +192,10 @@ class Pruner(nn.Module):
         for handle in self.handles:
             handle.remove()
 
-
+ # Zwraca losowo zainicjalizowaną warstwę rzadką w reprezentacji COO
 def new_random_basic_coo(in_features, out_features, bias=True):
     return SparseLayer(in_features, out_features, bias=bias)
 
-
+ # Zwraca losowo zainicjalizowaną warstwę rzadką w reprezentacji CSR
 def new_random_basic_csr(in_features, out_features, bias=True):
     return SparseLayer(in_features, out_features, bias=bias, csr_mode=True)
