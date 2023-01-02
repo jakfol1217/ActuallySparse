@@ -1,1 +1,0 @@
-# Póki co nieużywana, prawdopodobnie do usunięcia w przyszłości
