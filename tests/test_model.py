@@ -6,7 +6,7 @@ from torch.autograd import Variable
 from actuallysparse.layers import new_random_basic_coo, new_random_basic_csr
 from actuallysparse.converter import convert_model
 from actuallysparse.layers import prune_model
-from pretrained import vgg11_bn
+from models.pretrained import vgg11_bn
 
 from sklearn.datasets import load_iris
 from sklearn.preprocessing import StandardScaler
