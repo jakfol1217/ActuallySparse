@@ -92,30 +92,31 @@ def load_caltech256_dataloaders():
 
  # Klasa reprezentująca model VGG dostosowany do innych zbiorów danych (innych niż podstawowy w projekcie Cifar-10)
 class TransformedVgg(nn.Module):
-    def __init__(self, model, prev_out_features, new_out_features):
+    def __init__(self, model, new_out_features):
         super(TransformedVgg, self).__init__()
         self.features = model.features
         self.avgpool = model.avgpool
-        self.classifier = model.classifier
-        self.extra_layer = nn.Linear(prev_out_features, new_out_features)
+        layers = list(model.classifier.children())
+        no_last_layer = layers[:-1]
+        prev_in_features = layers[-1].in_features
+        self.classifier = nn.Sequential(*no_last_layer, nn.Linear(prev_in_features, new_out_features))
 
     def forward(self, x):
         x = self.features(x)
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
         x = self.classifier(x)
-        x = self.extra_layer(x)
         return x
 
  # Funkcja zwracająca model VGG dostosowany do wskazanego zbioru danych
-def get_pretrained_transformed_vgg(database_name):
+def get_pretrained_transformed_vgg(database_name: str):
     model = torchvision.models.vgg11_bn(weights=torchvision.models.VGG11_BN_Weights.IMAGENET1K_V1)
     if database_name == "cifar10":
-        model = TransformedVgg(model, 1000, 10)
+        model = TransformedVgg(model, 10)
     elif database_name == "cifar100":
-        model = TransformedVgg(model, 1000, 100)
+        model = TransformedVgg(model, 100)
     elif database_name == "caltech256":
-        model = TransformedVgg(model, 1000, 257)
+        model = TransformedVgg(model, 257)
     else:
         raise Exception("Unknown database name passed")
     return model
