@@ -29,9 +29,9 @@ caltech256_optim = torch.optim.Adam(model_caltech256.parameters(), lr=1e-3)
 ## ------------SCRIPT ARGUMENTS------------
 parser = argparse.ArgumentParser(description='Script trains VGG11_bn models on 3 datasets: Cifar-10, Cifar-100 and Caltech-256',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('cif10epochs', help= 'max epochs for cifar-10 dataset')
-parser.add_argument('cif100epochs', help= 'max epochs for cifar-100 dataset')
-parser.add_argument('cal256epochs', help= 'max epochs for caltech-256 dataset')
+parser.add_argument('cif10epochs', type=int, help= 'max epochs for cifar-10 dataset')
+parser.add_argument('cif100epochs', type=int, help= 'max epochs for cifar-100 dataset')
+parser.add_argument('cal256epochs', type=int, help= 'max epochs for caltech-256 dataset')
 parser.add_argument('dst', help='destination path for trained weights')
 args = vars(parser.parse_args())
 ## ------------SCRIPT ARGUMENTS END------------
