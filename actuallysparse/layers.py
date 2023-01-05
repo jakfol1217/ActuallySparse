@@ -3,6 +3,7 @@ import torch
 import warnings
 import torch.nn as nn
 import numpy as np
+import torch.autograd.profiler as profiler
 
 
 
@@ -68,10 +69,14 @@ class SparseLayer(nn.Module):
         if self.train_mode:
             weight = weight.to_dense()
             out = torch.mm(in_values, weight.t())
+            if self.bias is not None:
+                out = torch.add(out, self.bias)
         else:
-            out = torch.sparse.mm(weight, in_values.t()).t()
-        if self.bias is not None:
-            out = torch.add(out, self.bias)
+            with profiler.record_function("SPARSE PASS"):
+                out = torch.sparse.mm(weight, in_values.t()).t()
+                if self.bias is not None:
+                    out = torch.add(out, self.bias)
+
         return out
 
     # Funkcja służąca do nadawania nowych wag, głównie przy inicjalizacji
