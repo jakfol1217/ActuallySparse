@@ -4,7 +4,7 @@ from pretrained import get_pretrained_transformed_vgg
 from pretrained import load_cifar10_dataloaders, load_cifar100_dataloaders, load_caltech256_dataloaders
 
 
-training_device = "cuda" if torch.cuda.is_available() else "cpu"
+training_device = "cuda"
 
 ## ------------MODEL INITIALIZATION------------
 model_cifar10 = get_pretrained_transformed_vgg('cifar10')
