@@ -36,24 +36,31 @@ parser.add_argument('dst', help='destination path for trained weights')
 args = vars(parser.parse_args())
 ## ------------SCRIPT ARGUMENTS END------------
 
-def training_func(model, optimizers, criterion, dataloader, max_epochs, *_args, **_kwargs):
+def training_func(model, optimizer, criterion, dataloader, max_epochs, name, *_args, **_kwargs):
     model.train()
     model.to(training_device)
     torch.cuda.empty_cache()
     for epoch in range(max_epochs):
         for inputs, labels in dataloader:
             inputs, labels = inputs.to(training_device), labels.to(training_device)
-            optimizers.zero_grad()
+            optimizer.zero_grad()
             loss = criterion(model(inputs), labels)
             loss.backward()
-            optimizers.step()
+            optimizer.step()
+        if epoch % 2 == 0:
+            torch.save({
+            'epoch': epoch,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'loss': loss,
+            }, args['dst'] + '/' + name + '_' + str(epoch) + '.pt')
     torch.cuda.empty_cache()
 
 
 if __name__ == '__main__':
-    training_func(model_cifar10, cifar10_optim, criterion, train_cifar10, max_epochs=args['cif10epochs'])
-    training_func(model_cifar100, cifar100_optim, criterion, train_cifar100, max_epochs=args['cif100epochs'])
-    training_func(model_caltech256, caltech256_optim, criterion, train_caltech256, max_epochs=args['cal256epochs'])
-    torch.save(model_cifar10.state_dict(), args['dst'] + '/cifar10.pt')
-    torch.save(model_cifar100.state_dict(), args['dst'] + '/cifar100.pt')
-    torch.save(model_caltech256.state_dict(), args['dst'] + '/caltech256.pt')
+    training_func(model_cifar10, cifar10_optim, criterion, train_cifar10, max_epochs=args['cif10epochs'], name= 'cifar10')
+    training_func(model_cifar100, cifar100_optim, criterion, train_cifar100, max_epochs=args['cif100epochs'], name= 'cifar100')
+    training_func(model_caltech256, caltech256_optim, criterion, train_caltech256, max_epochs=args['cal256epochs'], name= 'caltech256')
+    torch.save(model_cifar10.state_dict(), args['dst'] + '/cifar10_end.pt')
+    torch.save(model_cifar100.state_dict(), args['dst'] + '/cifar100_end.pt')
+    torch.save(model_caltech256.state_dict(), args['dst'] + '/caltech256_end.pt')
