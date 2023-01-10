@@ -73,7 +73,7 @@ class SparseLayer(nn.Module):
             out = torch.mm(in_values, weight.t())
             if self.bias is not None:
                 out = torch.add(out, self.bias)
-        else:
+        elif self.train_mode is False:
             with profiler.record_function("SPARSE PASS"):
                 out = torch.sparse.mm(weight, in_values.t()).t()
                 if self.bias is not None:
