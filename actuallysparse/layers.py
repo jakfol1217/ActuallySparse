@@ -66,7 +66,9 @@ class SparseLayer(nn.Module):
         else:
             weight = torch.sparse_csr_tensor(crow_indices=self.row_indices, col_indices=self.col_indices,
                                              values=self.values, size=(self.out_features, self.in_features))
-        if self.train_mode:
+        if self.train_mode and self.csr_mode:
+            raise Exception("CSR mode does not support training")
+        if self.train_mode and not self.csr_mode:
             weight = weight.to_dense()
             out = torch.mm(in_values, weight.t())
             if self.bias is not None:
@@ -150,9 +152,15 @@ class SparseLayer(nn.Module):
             raise Exception("K must be a value between 0 and 1")
         self.k = k
     def train(self, mode = True):
-        self.train_mode = mode
+        if self.csr_mode:
+            self.train_mode=False
+        else:
+            self.train_mode = mode
     def eval(self, mode = True):
-        self.train_mode = not mode
+        if self.csr_mode:
+            self.train_mode=False
+        else:
+            self.train_mode = not mode
 
 
 
@@ -203,4 +211,4 @@ def new_random_basic_coo(in_features, out_features, bias=True):
 
  # Zwraca losowo zainicjalizowaną warstwę rzadką w reprezentacji CSR
 def new_random_basic_csr(in_features, out_features, bias=True):
-    return SparseLayer(in_features, out_features, bias=bias, csr_mode=True)
+    return SparseLayer(in_features, out_features, bias=bias, csr_mode=True, train_mode=False)
