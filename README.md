@@ -81,7 +81,30 @@ Sequential(
 Note that any zero values in the weight matrix get automatically reduced during the conversion process - no need to coalesce weights.
 
 ### Layers
-to be added
+SparseLayer is in man ways an extension of Linear layer from Pytorch, and, as such, can be created in exact same way. There are, however, some additional parametres, namely:
+ * train_mode - boolean flag enabling layer training (backward pass), True by default
+ * csr_mmode - boolean flag switching layer weight format from COO to CSR (CSR is not compatible with training), False by default
+ * k - float between 0.01 and 1, represents the percentage of parameters to be pruned, 0.05 by default
+ What is more, SparseLayer implements prune_smallest_values() method, which prunes the k smallest value parameters from the layer.  
+ Some usage examples:
+ ```
+ newSparseLayer = SparseLayer(
+    in_features=3,
+    out_features=3,
+    bias=True,
+    csr_mode=False,
+    train_mode=True,
+    k=0.05
+)
+dummy_input = torch.ones(3)
+result = newSparseLayer(dummy_input)
+ ```
+ Pruning example:
+ ```
+ newSparseLayer = SparseLayer(3, 3)
+ newSparseLayer.set_k(0.07)
+ newSparseLayer.prune_smallest_values()
+ ```
 
 ### Training mode
 Due to limitations in PyTorch optimizers, it is currently not possible to perform a backwards pass on sparse matrices. 
