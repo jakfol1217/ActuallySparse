@@ -6,3 +6,5 @@
 .weights/
 .pytest_cache/
 /preze_test.ipynb
+/find_best_model.py
+/prune_models.py

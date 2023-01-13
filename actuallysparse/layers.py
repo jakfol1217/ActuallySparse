@@ -133,6 +133,32 @@ class SparseLayer(nn.Module):
         indices = self.indices.index_select(1, mask)
         self.register_buffer('indices', indices)
 
+    def switch_to_CSR(self):
+        if self.csr_mode:
+            return
+        weight = torch.sparse_coo_tensor(values=self.values, indices=self.indices,
+                                             size=(self.out_features, self.in_features))
+        weight = weight.to_sparse_csr()
+        with torch.no_grad():
+            self.register_buffer('row_indices', weight.crow_indices())
+            self.register_buffer('col_indices', weight.col_indices())
+            self.values = nn.Parameter(weight.values())
+        self.train_mode = False
+        self.csr_mode = True
+
+
+    def switch_to_COO(self):
+        if not self.csr_mode:
+            return
+        weight = torch.sparse_csr_tensor(crow_indices=self.row_indices, col_indices=self.col_indices,
+                                         values=self.values, size=(self.out_features, self.in_features))
+        weight = weight.to_sparse_coo()
+        with torch.no_grad():
+            self.register_buffer('indices', weight.indices())
+            self.values = nn.Parameter(weight.values())
+        self.csr_mode = False
+
+
     @property
     def weight(self):
         if self.csr_mode:
