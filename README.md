@@ -1,5 +1,5 @@
 # PyTorch ActuallySparse Module
-* **Autorzy: Kacper Grzymkowski, Jakub Fołtyn**  
+* **Authors: Kacper Grzymkowski, Jakub Fołtyn**  
 
 Projekt związany z pracą inżynierską pt. "*Zastosowanie metod redukcji wielkości modelu sieci neuronowej podczas procesu uczenia*". Obejmuje implementację rzadkiej warstwy liniowej, będącej rozszerzeniem warstw liniowych sieci neuronowej z biblioteki PyTorch, a także moduł konwersji, pozwalający na swobodne przekształcenia między warstwami (gęsta &rarr; rzadka oraz rzadka &rarr; gęsta).  
 
