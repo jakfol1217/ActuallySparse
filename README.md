@@ -105,7 +105,17 @@ result = newSparseLayer(dummy_input)
  newSparseLayer.set_k(0.07)
  newSparseLayer.prune_smallest_values()
  ```
-
+layers.py also contains prune_model() and set_global_k() methods, which can be used to efficiently prune all SparseLayers inside a model (the latter sets a global k value to all sparse layers, while the former pruns them), usage example:
+```
+sparseClassifier = nn.Sequential(
+    SparseLayer(16, 16),
+    nn.ReLU(),
+    SparseLayer(16, 3)
+)
+set_global_k(sparseClassifier, 0.07)
+dummy_input = torch.ones(16)
+prune_model(sparseClassifier, dummy_input)
+```
 ### Training mode
 Due to limitations in PyTorch optimizers, it is currently not possible to perform a backwards pass on sparse matrices. 
 Because of this, `SparseLayer` in training mode will convert its sparse matrix to a dense representation during a forward pass, rather than using the sparse representation.
