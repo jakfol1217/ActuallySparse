@@ -121,34 +121,3 @@ def get_pretrained_transformed_vgg(database_name: str):
         raise Exception("Unknown database name passed")
     return model
 
-# def fit_one_cycle(epochs, max_lr, model, train_loader, weight_decay=0, grad_clip=None, opt_func=torch.optim.Adam):
-#
-#     # Set up custom optimizer with weight decay
-#     optimizer = opt_func(model.parameters(), max_lr, weight_decay=weight_decay)
-#     # Set up one-cycle learning rate scheduler
-#     sched = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr, epochs=epochs,
-#                                                 steps_per_epoch=len(train_loader))
-#
-#     for epoch in range(epochs):
-#         # Training Phase
-#         model.train()
-#         print(f"Epoch:{epoch + 1}")
-#         for batch in train_loader:
-#             vals, labels = batch
-#             out = model(vals)
-#             loss = torch.nn.functional.cross_entropy(out, labels)
-#             loss.backward()
-#
-#             # Gradient clipping
-#             if grad_clip:
-#                 nn.utils.clip_grad_value_(model.parameters(), grad_clip)
-#
-#             optimizer.step()
-#             optimizer.zero_grad()
-#
-#             # Record & update learning rate
-#             sched.step()
-#
-#
-# fit_one_cycle(3, 0.001, transformed_model, dataloader_train, weight_decay=0.01,
-#               grad_clip = 0.1, opt_func=torch.optim.Adam)
