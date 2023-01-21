@@ -111,7 +111,7 @@ class SparseLayer(nn.Module):
     def prune_smallest_values(self, remove_zeros=True):
         num_elements_to_prune = math.floor(self.k * self.in_features * self.out_features)
         with torch.no_grad():
-            values = abs(self.values.numpy())
+            values = abs(self.values.cpu().numpy())
             num_non_zero_values = len(values)
             if num_non_zero_values <= num_elements_to_prune:
                 self.values[self.values!=0] = 0
