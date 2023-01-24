@@ -71,9 +71,9 @@ def load_cifar100_dataloaders():
         torchvision.transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
     ])
     dataset_train = torchvision.datasets.CIFAR100(".data", download=True, transform=transform)
-    dataloader_train = torch.utils.data.DataLoader(dataset_train, batch_size=64)
+    dataloader_train = torch.utils.data.DataLoader(dataset_train, batch_size=16)
     dataset_test = torchvision.datasets.CIFAR100(".data", download=True, train=False, transform=transform)
-    dataloader_test = torch.utils.data.DataLoader(dataset_test, batch_size=64)
+    dataloader_test = torch.utils.data.DataLoader(dataset_test, batch_size=16)
     return dataloader_train, dataloader_test
 
  # Funkcja zwracająca dane ze zbioru Caltech-256
@@ -89,6 +89,57 @@ def load_caltech256_dataloaders():
     dataloader_train = torch.utils.data.DataLoader(dataset_train, batch_size=16)
     dataloader_test = torch.utils.data.DataLoader(dataset_test, batch_size=16)
     return dataloader_train, dataloader_test
+
+ # Funkcja zwracająca dane ze zbioru Cifar-10 ze zbiorem walidacyjnym
+def load_cifar10_dataloaders_validation():
+    transform = torchvision.transforms.Compose([
+        torchvision.transforms.ToTensor(),
+        torchvision.transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    ])
+    dataset = torchvision.datasets.CIFAR10(".data", download=True, transform=transform)
+    size_train = 0.9*len(dataset)
+    size_val = len(dataset) - size_train
+    dataset_train, dataset_val = torch.utils.data.random_split(dataset, [int(size_train), int(size_val)])
+    dataloader_train = torch.utils.data.DataLoader(dataset_train, batch_size=16)
+    dataloader_val = torch.utils.data.DataLoader(dataset_val, batch_size=16)
+    dataset_test = torchvision.datasets.CIFAR10(".data", download=True, train=False, transform=transform)
+    dataloader_test = torch.utils.data.DataLoader(dataset_test, batch_size=16)
+    return dataloader_train, dataloader_test, dataloader_val
+
+ # Funkcja zwracająca dane ze zbioru Cifar-100 ze zbiorem walidacyjnym
+def load_cifar100_dataloaders_validation():
+    transform = torchvision.transforms.Compose([
+        torchvision.transforms.ToTensor(),
+        torchvision.transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+    ])
+    dataset = torchvision.datasets.CIFAR100(".data", download=True, transform=transform)
+    size_train = 0.9*len(dataset)
+    size_val = len(dataset) - size_train
+    dataset_train, dataset_val = torch.utils.data.random_split(dataset, [int(size_train), int(size_val)])
+    dataloader_train = torch.utils.data.DataLoader(dataset_train, batch_size=16)
+    dataloader_val = torch.utils.data.DataLoader(dataset_val, batch_size=16)
+    dataset_test = torchvision.datasets.CIFAR100(".data", download=True, train=False, transform=transform)
+    dataloader_test = torch.utils.data.DataLoader(dataset_test, batch_size=16)
+    return dataloader_train, dataloader_test, dataloader_val
+
+ # Funkcja zwracająca dane ze zbioru Caltech-256 ze zbiorem walidacyjnym
+def load_caltech256_dataloaders_validation():
+    transform = torchvision.transforms.Compose([
+        torchvision.transforms.Resize((224, 224)),
+        torchvision.transforms.ToTensor(),
+        torchvision.transforms.Lambda(lambda x: x.repeat(3, 1, 1) if x.size(0) == 1 else x),
+        torchvision.transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
+    ])
+    dataset = torchvision.datasets.Caltech256(".data", download=True, transform=transform)
+    dataset_train, dataset_test = torch.utils.data.random_split(dataset, [30000, 607])
+    size_train = 0.9*len(dataset_train)
+    size_val = len(dataset_train) - size_train
+    dataset_train, dataset_val = torch.utils.data.random_split(dataset_train, [int(size_train), int(size_val)])
+    dataloader_train = torch.utils.data.DataLoader(dataset_train, batch_size=16)
+    dataloader_val = torch.utils.data.DataLoader(dataset_val, batch_size=16)
+    dataloader_test = torch.utils.data.DataLoader(dataset_test, batch_size=16)
+    return dataloader_train, dataloader_test, dataloader_val
+
 
  # Klasa reprezentująca model VGG dostosowany do innych zbiorów danych (innych niż podstawowy w projekcie Cifar-10)
 class TransformedVgg(nn.Module):
