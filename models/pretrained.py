@@ -172,3 +172,14 @@ def get_pretrained_transformed_vgg(database_name: str):
         raise Exception("Unknown database name passed")
     return model
 
+def get_pretrained_transformed_vgg16(database_name: str):
+    model = torchvision.models.vgg16_bn(weights=torchvision.models.VGG16_BN_Weights.IMAGENET1K_V1)
+    if database_name == "cifar10":
+        model = TransformedVgg(model, 10)
+    elif database_name == "cifar100":
+        model = TransformedVgg(model, 100)
+    elif database_name == "caltech256":
+        model = TransformedVgg(model, 257)
+    else:
+        raise Exception("Unknown database name passed")
+    return model
