@@ -108,7 +108,7 @@ class SparseLayer(nn.Module):
         self.register_buffer('indices', weight.indices())
 
     # Ustawia k procent najmniejszych wartości na 0
-    def prune_smallest_values(self, remove_zeros=True):
+    def prune_smallest_values(self):
         num_elements_to_prune = math.floor(self.k * self.in_features * self.out_features)
         with torch.no_grad():
             values = abs(self.values.cpu().numpy())
@@ -118,8 +118,7 @@ class SparseLayer(nn.Module):
             else:
                 indexes_to_prune = np.argpartition(values, num_elements_to_prune)[:num_elements_to_prune]
                 self.values[np.sort(indexes_to_prune)] = 0
-        if remove_zeros:
-            self.remove_zeros_from_weight()
+        self.remove_zeros_from_weight()
 
     # Usuwa zera z listy wartości wagi, nie działa dla reprezentacji CSR
     # Tworzy nowy tensor rzadki i zapisuje na miejsce starego
