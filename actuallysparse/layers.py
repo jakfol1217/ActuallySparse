@@ -26,7 +26,7 @@ class SparseLayer(nn.Module):
         super(SparseLayer, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
-        self.csr_mode = csr_mode
+        self.__csr_mode = csr_mode
         self.train_mode = train_mode
         self.k = k
         # Inicjalizacja wag
@@ -60,15 +60,15 @@ class SparseLayer(nn.Module):
             raise Exception("Input values shape does not match")
         if in_values.size()[1] != self.in_features:
             in_values = in_values.t()
-        if not self.csr_mode:
+        if not self.__csr_mode:
             weight = torch.sparse_coo_tensor(values=self.values, indices=self.indices,
                                              size=(self.out_features, self.in_features))
         else:
             weight = torch.sparse_csr_tensor(crow_indices=self.row_indices, col_indices=self.col_indices,
                                              values=self.values, size=(self.out_features, self.in_features))
-        if self.train_mode and self.csr_mode:
+        if self.train_mode and self.__csr_mode:
             raise Exception("CSR mode does not support training")
-        if self.train_mode and not self.csr_mode:
+        if self.train_mode and not self.__csr_mode:
             weight = weight.to_dense()
             out = torch.mm(in_values, weight.t())
             if self.bias is not None:
@@ -97,7 +97,7 @@ class SparseLayer(nn.Module):
         if bias is not None:
             self.bias = nn.Parameter(bias)
 
-        if self.csr_mode:
+        if self.__csr_mode:
             weight = new_weight.to_sparse_csr()
             self.values = nn.Parameter(weight.values())
             self.register_buffer('row_indices', weight.crow_indices())
@@ -123,7 +123,7 @@ class SparseLayer(nn.Module):
     # Usuwa zera z listy wartości wagi, nie działa dla reprezentacji CSR
     # Tworzy nowy tensor rzadki i zapisuje na miejsce starego
     def remove_zeros_from_weight(self):
-        if self.csr_mode:
+        if self.__csr_mode:
             raise Exception("Cannot remove zeroes with csr mode on")
         mask = self.values.nonzero().view(-1)
         require_grad = self.values.requires_grad
@@ -133,7 +133,7 @@ class SparseLayer(nn.Module):
         self.register_buffer('indices', indices)
 
     def switch_to_CSR(self):
-        if self.csr_mode:
+        if self.__csr_mode:
             return
         weight = torch.sparse_coo_tensor(values=self.values, indices=self.indices,
                                              size=(self.out_features, self.in_features))
@@ -143,11 +143,11 @@ class SparseLayer(nn.Module):
             self.register_buffer('col_indices', weight.col_indices())
             self.values = nn.Parameter(weight.values())
         self.train_mode = False
-        self.csr_mode = True
+        self.__csr_mode = True
 
 
     def switch_to_COO(self):
-        if not self.csr_mode:
+        if not self.__csr_mode:
             return
         weight = torch.sparse_csr_tensor(crow_indices=self.row_indices, col_indices=self.col_indices,
                                          values=self.values, size=(self.out_features, self.in_features))
@@ -155,12 +155,15 @@ class SparseLayer(nn.Module):
         with torch.no_grad():
             self.register_buffer('indices', weight.indices())
             self.values = nn.Parameter(weight.values())
-        self.csr_mode = False
+        self.__csr_mode = False
+
+    def is_csr(self):
+        return self.__csr_mode
 
 
     @property
     def weight(self):
-        if self.csr_mode:
+        if self.__csr_mode:
             weight = torch.sparse_csr_tensor(crow_indices=self.row_indices, col_indices=self.col_indices,
                                              values=self.values, size=(self.out_features, self.in_features))
         else:
@@ -169,7 +172,7 @@ class SparseLayer(nn.Module):
         return weight
 
     def __repr__(self):
-        return f"SparseLayer(in_features={self.in_features}, out_features={self.out_features}, bias={self.bias is not None}, csr_mode={self.csr_mode}, k={self.k})"
+        return f"SparseLayer(in_features={self.in_features}, out_features={self.out_features}, bias={self.bias is not None}, csr_mode={self.__csr_mode}, k={self.k})"
 
     # Funkcje ustawiające parametry sieci
     def set_k(self, k):
@@ -177,12 +180,12 @@ class SparseLayer(nn.Module):
             raise Exception("K must be a value between 0 and 1")
         self.k = k
     def train(self, mode = True):
-        if self.csr_mode:
+        if self.__csr_mode:
             self.train_mode=False
         else:
             self.train_mode = mode
     def eval(self, mode = True):
-        if self.csr_mode:
+        if self.__csr_mode:
             self.train_mode=False
         else:
             self.train_mode = not mode
