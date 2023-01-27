@@ -114,7 +114,7 @@ sparseClassifier = nn.Sequential(
 )
 set_global_k(sparseClassifier, 0.07)
 dummy_input = torch.ones(16)
-prune_model(sparseClassifier, dummy_input)
+prune_sparse_model(sparseClassifier, dummy_input)
 ```
 ### Training mode
 Due to limitations in PyTorch optimizers, it is currently not possible to perform a backwards pass on sparse matrices. 
