@@ -197,7 +197,7 @@ def _pruning_hook(layer: SparseLayer, _, __):
 
  # Funkcja globalna służąca do zmniejszania wartości modelu (potrzebuje przykładowych wartości wejściowych, tzn. "dummy input")
  # "Opakowanie" klasy Pruner
-def prune_model(model: nn.Module, dummy_input: torch.Tensor):
+def prune_sparse_model(model: nn.Module, dummy_input: torch.Tensor):
     pruner = Pruner(model)
     pruner(dummy_input)
     pruner.remove_hooks()

@@ -5,7 +5,7 @@ from torch.autograd import Variable
 
 from actuallysparse.layers import new_random_basic_coo, new_random_basic_csr
 from actuallysparse.converter import convert_model
-from actuallysparse.layers import prune_model
+from actuallysparse.layers import prune_sparse_model
 from models.pretrained import vgg11_bn
 
 from sklearn.datasets import load_iris
@@ -127,7 +127,7 @@ def test_model_pruning(iris_data):
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
     values_start = model[0].values
-    prune_model(model, X)
+    prune_sparse_model(model, X)
     values_mid = model[0].values
 
     with torch.no_grad():
@@ -158,7 +158,7 @@ def test_pretrained_model_convert_and_prune():
     model.classifier = convert_model(model.classifier, nn.Linear, 'coo')
     dummy_input = torch.ones(512)
     values_start = model.classifier[0].values
-    prune_model(model.classifier, dummy_input)
+    prune_sparse_model(model.classifier, dummy_input)
     values_end = model.classifier[0].values
     assert len(values_start) > len(values_end)
 
