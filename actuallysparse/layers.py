@@ -157,7 +157,7 @@ class SparseLayer(nn.Module):
             self.values = nn.Parameter(weight.values())
         self.__csr_mode = False
 
-    def is_csr(self):
+    def is_CSR(self):
         return self.__csr_mode
 
 

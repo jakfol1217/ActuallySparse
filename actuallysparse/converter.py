@@ -31,9 +31,9 @@ def convert_model(model: Module, module_to_replace: Module, target: str):
 def match_extractor(layer):
     if isinstance(layer, Linear):
         return extract_params_dense
-    elif isinstance(layer, SparseLayer) and not layer.is_csr():
+    elif isinstance(layer, SparseLayer) and not layer.is_CSR():
         return extract_params_sparse_coo
-    elif isinstance(layer, SparseLayer) and layer.is_csr():
+    elif isinstance(layer, SparseLayer) and layer.is_CSR():
         return extract_params_sparse_csr
     else:
         raise TypeError("Convert module requires layer to be Linear or SparseLayer")
