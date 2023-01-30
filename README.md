@@ -22,11 +22,9 @@ Projekt związany z pracą inżynierską pt. "*Zastosowanie metod redukcji wielk
   - Zawiera skrypty tworzące i uczące modele sieci neuronowych, jak i testy porównawcze działania modeli zwykłych oraz pomniejszonych. Poszczególne pliki zawierają następujące funkcjonalności:
     - *training_loop.ipynb* - porównanie pętli dotrenowującej model (z jednoczesnym zmniejszaniem jego rozmiaru) zaimplementowanej przez autorów oraz utworzonej na podstawie funkcjonalności z biblioteki NNI.
     - *generate_baselines.ipynb* - utworzenie i wytrenowanie podstawowych modeli o różnych stopniach rzadkości, służących jako "baza porównawcza" dla dalszych analiz.
-    - *integrate.ipynb* -
     - *memory.ipynb* - analizy zajętości pamięciowej modeli poddanych zmniejszeniu.
     - *pretrained.py* - funkcje zawierające architekrurę gotowego modelu wykorzystywanego do analiz, tzn. **VGG11_bn**.
-    - *sparse_loop.ipynb* -
-    - *sparsify.ipynb* -
+
   
   
 [English]
