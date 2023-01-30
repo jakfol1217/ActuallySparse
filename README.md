@@ -105,7 +105,7 @@ result = newSparseLayer(dummy_input)
  newSparseLayer.set_k(0.07)
  newSparseLayer.prune_smallest_values()
  ```
-layers.py also contains prune_model() and set_global_k() methods, which can be used to efficiently prune all SparseLayers inside a model (the latter sets a global k value to all sparse layers, while the former pruns them), usage example:
+layers.py also contains prune_sparse_model() and set_global_k() methods, which can be used to efficiently prune all SparseLayers inside a model (the latter sets a global k value to all sparse layers, while the former pruns them), usage example:
 ```
 sparseClassifier = nn.Sequential(
     SparseLayer(16, 16),
