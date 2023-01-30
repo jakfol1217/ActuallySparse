@@ -133,3 +133,7 @@ conda develop .
 * `actuallysparse/`contains implementation of the converter module (`converter.py`) and the sparse layer (`layers.py`)
 * `tests/` contains automated tests for above modules (`test_converter.py`, `test_layer.py`) and for integration between them with a full example model (`test_model.py`). These can be run using the `pytest` test framework.
 * `models/` contains notebooks and scripts used for creating and training neural networks used in our analyses, as well as experiments designed to compare effectiveness, performance and memory usage of converted models.
+
+## Acknowledgment
+
+This project is partially based on [SparseLinear](https://github.com/hyeon95y/SparseLinear) and [PyTorch_CIFAR10](https://github.com/huyvnphan/PyTorch_CIFAR10/) projects. Thanks [@hyeon95y](https://github.com/hyeon95y) and [@huyvnphan](https://github.com/huyvnphan) for your hard work.
